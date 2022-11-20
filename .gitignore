@@ -2,6 +2,7 @@
 .idea/
 out/
 test/
+src/META-INF
 
 # file
 .properties
