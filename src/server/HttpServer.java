@@ -1,11 +1,15 @@
 package server;
 
+import database.MemberDAO;
+import database.MemberVO;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +29,7 @@ public class HttpServer {
             throw new RuntimeException(e);
         }
         PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
-        
+
         // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             Socket connection;
@@ -47,7 +51,7 @@ public class HttpServer {
 
             HttpRequest request = requestBuilder(connection.getInputStream());
 
-            HttpResponse response = dispatcher(request);
+            HttpResponse response = requestDispatcher(request);
 
             out.write(response.toString().getBytes());
             out.flush();
@@ -122,17 +126,28 @@ public class HttpServer {
     }
 
 
-    private static HttpResponse dispatcher(HttpRequest httpRequest) {
-        Function<HttpRequest, HttpResponse> user = s -> {
-            return new HttpResponse("200 OK", "user");
+    private static HttpResponse requestDispatcher(HttpRequest httpRequest) {
+        Function<HttpRequest, HttpResponse> member = s -> {
+
+            // DB에서 member 정보 가져오기
+            MemberDAO memberDAO = new MemberDAO();
+            List<MemberVO> memberVOList = memberDAO.getMemberVOList();
+
+            // body 만들기
+            StringBuilder stringBuilder = new StringBuilder();
+            for (MemberVO memberVO : memberVOList) {
+                stringBuilder.append(memberVO.toString()).append("\r\n");
+            }
+
+            return new HttpResponse("200 OK", stringBuilder.toString());
         };
         Function<HttpRequest, HttpResponse> other = s -> {
-            return new HttpResponse("404 Not Found", "others");
+            return new HttpResponse("404 Not Found", "404 Not Found");
         };
 
         Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
             {
-                put("/user", user);
+                put("/member", member);
                 put("/", other);
             }
         };
