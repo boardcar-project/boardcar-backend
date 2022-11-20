@@ -7,16 +7,26 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public class HttpServer {
-    private static final int PORT = 59699;
 
     public static void main(String[] args) {
-        System.out.println("Server Online (PORT : " + PORT + ")");
 
+        // PORT 번호 읽기
+        final int PORT;
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(".properties"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
+        
+        // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             Socket connection;
             ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -65,7 +75,7 @@ public class HttpServer {
 
 
         // 헤더 - 요청 부분 parse
-        String requestInfo = requestArr[0]; // 요청
+        String requestInfo = requestArr[0]; // requestArr[0] : 요청 전체
         String[] requestInfoArr = requestInfo.split(" ");
         String method = requestInfoArr[0];
         String path = requestInfoArr[1];
@@ -160,12 +170,14 @@ class HttpResponse {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("HTTP/1.1 " + status + " \r\n");
-        sb.append("Content-Type: text/html;charset=utf-8\r\n");
-        sb.append("Content-Length: " + body.length() + "\r\n");
-        sb.append("\r\n");
-        sb.append(body);
-        return sb.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("HTTP/1.1 ").append(status).append(" \r\n");
+        stringBuilder.append("Content-Type: text/html;charset=utf-8\r\n");
+        stringBuilder.append("Content-Length: ").append(body.length()).append("\r\n");
+        stringBuilder.append("\r\n");
+        stringBuilder.append(body);
+
+        return stringBuilder.toString();
     }
 }
