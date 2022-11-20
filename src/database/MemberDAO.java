@@ -42,7 +42,7 @@ public class MemberDAO {
         List<MemberVO> memberVOList = new LinkedList<>();
 
         try {
-            PreparedStatement sqlQuery = this.connection.prepareStatement("select hi from member");
+            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
 
             ResultSet resultSet = sqlQuery.executeQuery();
             while (resultSet.next()) {
