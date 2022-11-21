@@ -7,3 +7,4 @@ src/META-INF
 # file
 .properties
 boardcar-server.iml
+*.bak
