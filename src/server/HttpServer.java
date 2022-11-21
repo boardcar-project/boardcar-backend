@@ -4,8 +4,10 @@ import database.MemberDAO;
 import database.MemberVO;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -19,19 +21,27 @@ import java.util.function.Function;
 public class HttpServer {
 
     public static void main(String[] args) {
+        // Host IP 출력
+        try {
+            System.out.println(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
 
-        // PORT 번호 읽기
-        final int PORT;
+        // IP, PORT 번호 읽기
+        final int SERVER_PORT;
+        final String SERVER_IP;
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream(".properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
+        SERVER_IP = properties.getProperty("SERVER_IP");
+        SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // 서버 시작
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT, 50, InetAddress.getByName(SERVER_IP))) {
             Socket connection;
             ExecutorService executorService = Executors.newFixedThreadPool(10);
             while ((connection = serverSocket.accept()) != null) {
@@ -47,12 +57,14 @@ public class HttpServer {
 
     private static void requestHandler(Socket connection) {
         try {
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-
+            // Sender의 InputStream
             HttpRequest request = requestBuilder(connection.getInputStream());
 
+            // Sender의 Request 처리
             HttpResponse response = requestDispatcher(request);
 
+            // Sender에게 Request 응답
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.write(response.toString().getBytes());
             out.flush();
 
@@ -64,7 +76,6 @@ public class HttpServer {
 
     private static HttpRequest requestBuilder(InputStream inputStream) throws IOException {
 
-
         // HTTP 요청 전체 읽기
         StringBuilder sb = new StringBuilder();
         String inputLine;
@@ -72,11 +83,9 @@ public class HttpServer {
             sb.append(inputLine).append("\n"); // sb : HTTP 요청 전체
         }
 
-
         // HTTP 요청 한 줄씩 처리
         String request = sb.toString();
         String[] requestArr = request.split("\n"); // \n으로 split -> 한 줄씩 나눔
-
 
         // 헤더 - 요청 부분 parse
         String requestInfo = requestArr[0]; // requestArr[0] : 요청 전체
@@ -106,7 +115,6 @@ public class HttpServer {
         }
         String body = new String(byteBuffer.array(), StandardCharsets.UTF_8).trim();
 
-        System.out.println(body);
         return new HttpRequest(method, path, version, headers, body);
     }
 
@@ -127,6 +135,8 @@ public class HttpServer {
 
 
     private static HttpResponse requestDispatcher(HttpRequest httpRequest) {
+
+        // PATH = "/member/"
         Function<HttpRequest, HttpResponse> member = s -> {
 
             // DB에서 member 정보 가져오기
@@ -141,14 +151,14 @@ public class HttpServer {
 
             return new HttpResponse("200 OK", stringBuilder.toString());
         };
-        Function<HttpRequest, HttpResponse> other = s -> {
-            return new HttpResponse("404 Not Found", "404 Not Found");
-        };
 
+        // 등록되지 않은 PATH
+        Function<HttpRequest, HttpResponse> other = s -> new HttpResponse("404 Not Found", "404 Not Found");
+
+        // PATH MAP
         Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
             {
                 put("/member", member);
-                put("/", other);
             }
         };
 
@@ -175,7 +185,6 @@ class HttpRequest {
 
 class HttpResponse {
     String status;
-    Map<String, String> headers = new HashMap<>();
     String body;
 
     public HttpResponse(String status, String body) {
