@@ -14,25 +14,27 @@ public class MemberDAO {
 
     public MemberDAO() {
         try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
             this.connection = DatabaseConnection.getDatabaseConnection();
-        } catch (IOException | SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public MemberVO getMemberById(String mid) throws SQLException {
+    public MemberVO getMember(String mid) {
 
         PreparedStatement sqlQuery;
+        try {
+            sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
+            sqlQuery.setString(1, mid);
 
-        sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
-        sqlQuery.setString(1, mid);
+            ResultSet resultSet = sqlQuery.executeQuery();
+            resultSet.next();
 
-        ResultSet resultSet = sqlQuery.executeQuery();
-        resultSet.next();
+            return new MemberVO(resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
-        return new MemberVO(resultSet);
     }
 
     public List<MemberVO> getMemberVOList() {
@@ -40,7 +42,7 @@ public class MemberDAO {
         List<MemberVO> memberVOList = new LinkedList<>();
 
         try {
-            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from MEMBER");
+            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
 
             ResultSet resultSet = sqlQuery.executeQuery();
             while (resultSet.next()) {
@@ -49,7 +51,6 @@ public class MemberDAO {
 
             return memberVOList;
         } catch (SQLException e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

@@ -5,29 +5,25 @@ import java.sql.SQLException;
 
 public class MemberVO {
 
-    private final String MID;
-    private final String PASSWORD;
-    private final String NAME;
-    private final String EMAIL;
+    private final String mid;
+    private final String pw;
+    private final String name;
+    private final String email;
 
     public MemberVO(ResultSet resultSet) throws SQLException {
-        this.MID = resultSet.getString("MID");
-        this.PASSWORD = resultSet.getString("PASSWORD");
-        this.NAME = resultSet.getString("MNAME");
-        this.EMAIL = resultSet.getString("EMAIL");
+        this.mid = resultSet.getString("mid");
+        this.pw = resultSet.getString("pw");
+        this.name = resultSet.getString("name");
+        this.email = resultSet.getString("email");
     }
 
     @Override
     public String toString() {
         return "MemberVO{" +
-                "mid='" + MID + '\'' +
-                ", pw='" + PASSWORD + '\'' +
-                ", name='" + NAME + '\'' +
-                ", email='" + EMAIL + '\'' +
+                "mid='" + mid + '\'' +
+                ", pw='" + pw + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
                 '}';
-    }
-
-    public String getPASSWORD() {
-        return PASSWORD;
     }
 }
