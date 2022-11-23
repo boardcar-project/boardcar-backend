@@ -34,6 +34,7 @@ public class MemberDAO {
 
             return new MemberVO(resultSet);
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -53,6 +54,7 @@ public class MemberDAO {
 
             return memberVOList;
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
