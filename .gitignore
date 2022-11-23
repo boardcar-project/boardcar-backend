@@ -2,6 +2,7 @@
 .idea/
 out/
 test/
+docker/
 src/META-INF
 
 # file
