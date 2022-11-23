@@ -11,10 +11,10 @@ public class MemberVO {
     private final String email;
 
     public MemberVO(ResultSet resultSet) throws SQLException {
-        this.mid = resultSet.getString("mid");
-        this.pw = resultSet.getString("pw");
-        this.name = resultSet.getString("name");
-        this.email = resultSet.getString("email");
+        this.mid = resultSet.getString("MID");
+        this.pw = resultSet.getString("PASSWORD");
+        this.name = resultSet.getString("MNAME");
+        this.email = resultSet.getString("EMAIL");
     }
 
     @Override

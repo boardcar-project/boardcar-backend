@@ -14,8 +14,10 @@ public class MemberDAO {
 
     public MemberDAO() {
         try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
             this.connection = DatabaseConnection.getDatabaseConnection();
-        } catch (IOException | SQLException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -42,7 +44,7 @@ public class MemberDAO {
         List<MemberVO> memberVOList = new LinkedList<>();
 
         try {
-            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
+            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from MEMBER");
 
             ResultSet resultSet = sqlQuery.executeQuery();
             while (resultSet.next()) {
