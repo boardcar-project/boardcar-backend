@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class Controller {
+public class RequestController {
     public static Map<String, String> sessionContext = new HashMap<>();
 
     public static Function<HttpRequest, HttpResponse> httpTest = request -> new HttpResponse("200 OK", "httpTest Success");
@@ -40,7 +40,7 @@ public class Controller {
         }
 
         // 로그인 성공! -> 세션 생성
-        HttpResponse httpResponse = new HttpResponse("200 OK", "");
+        HttpResponse httpResponse = new HttpResponse("200 OK", "login success");
         UUID uuid = UUID.randomUUID();
         sessionContext.put(uuid.toString(), requestId);
 
