@@ -12,16 +12,18 @@ import java.util.function.Function;
 
 public class HttpClientTestApp {
 
+    public static Map<String, String> cookieMap = new HashMap<>();
+
     public static void main(String[] args) {
 
-        /* GET TEST */
-        HttpRequest testRequest = new HttpRequest("GET", "/httpTest", "HTTP/1.1", null);
-        System.out.println("GET - /httpTest 시작");
-
-        HttpResponse testResponse = requestToServer(testRequest);
-        System.out.println(testResponse.status);
-
-        System.out.println("GET - /httpTest 종료");
+//        /* GET TEST */
+//        HttpRequest testRequest = new HttpRequest("GET", "/httpTest", "HTTP/1.1", null);
+//        System.out.println("GET - /httpTest 시작");
+//
+//        HttpResponse testResponse = requestToServer(testRequest);
+//        System.out.println(testResponse.status);
+//
+//        System.out.println("GET - /httpTest 종료");
 
         /* POST TEST */
         // 로그인 정보 JSON 생성
@@ -34,6 +36,13 @@ public class HttpClientTestApp {
         System.out.println("POST - /login(id=testid, password=testpw) 시작");
 
         HttpResponse loginResponse = requestToServer(loginRequest);
+        // 클라이언트에 쿠키 저장
+        String cookieHeader = loginResponse.headers.get("Set-Cookie");
+        String[] cookies = cookieHeader.split(";");
+        for (String cookie : cookies) {
+            String[] cookieEntry = cookie.split("=");
+            cookieMap.put(cookieEntry[0], cookieEntry[1]);
+        }
         System.out.println(loginResponse.status);
         System.out.println(loginResponse.body);
 
@@ -150,6 +159,7 @@ class HttpResponse {
     String status;
     Map<String, String> headers;
 
+    Map<String, String> cookie = new HashMap<>();
 
     String body;
 
@@ -160,9 +170,10 @@ class HttpResponse {
         this.body = body;
     }
 
-    public String getBody() {
-        return body;
+    public void setCookie(String key, String value) {
+        cookie.put(key, value);
     }
+
 }
 
 
