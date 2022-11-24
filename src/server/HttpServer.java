@@ -97,7 +97,7 @@ public class HttpServer {
         String[] requestInfoArr = requestInfo.split(" ");
         String method = requestInfoArr[0];
         String path = requestInfoArr[1];
-        String version = requestInfoArr[1];
+        String version = requestInfoArr[2];
 
         // 남은 헤더 parse
         Map<String, String> headers = new HashMap<>();
@@ -148,13 +148,13 @@ public class HttpServer {
         // PATH MAP
         Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
             {
-                put("/httpTest", Controller.httpTest);
-                put("/login", Controller.login);
-                put("/member", Controller.member);
+                put("/httpTest", RequestController.httpTest);
+                put("/login", RequestController.login);
+                put("/member", RequestController.member);
             }
         };
 
-        return dispatcherTable.getOrDefault(httpRequest.path, Controller.other).apply(httpRequest);
+        return dispatcherTable.getOrDefault(httpRequest.path, RequestController.other).apply(httpRequest);
 
     }
 }
@@ -175,6 +175,7 @@ class HttpRequest {
         this.cookie = new HashMap<>();
 //        Optionof 알아보기
 
+        // 쿠키 초기화
         String cookieStr = headers.getOrDefault("Cookie", null);
         if (cookieStr != null && !cookieStr.trim().isEmpty()) {
             for (String property : cookieStr.split(";")) {
