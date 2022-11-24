@@ -22,22 +22,17 @@ public class MemberDAO {
         }
     }
 
-    public MemberVO getMember(String mid) {
+    public MemberVO getMemberById(String mid) throws SQLException {
 
         PreparedStatement sqlQuery;
-        try {
-            sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
-            sqlQuery.setString(1, mid);
 
-            ResultSet resultSet = sqlQuery.executeQuery();
-            resultSet.next();
+        sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
+        sqlQuery.setString(1, mid);
 
-            return new MemberVO(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        ResultSet resultSet = sqlQuery.executeQuery();
+        resultSet.next();
 
+        return new MemberVO(resultSet);
     }
 
     public List<MemberVO> getMemberVOList() {
