@@ -14,8 +14,10 @@ public class MemberDAO {
 
     public MemberDAO() {
         try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
             this.connection = DatabaseConnection.getDatabaseConnection();
-        } catch (IOException | SQLException e) {
+        } catch (IOException | SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -32,6 +34,7 @@ public class MemberDAO {
 
             return new MemberVO(resultSet);
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -51,6 +54,7 @@ public class MemberDAO {
 
             return memberVOList;
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
