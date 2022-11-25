@@ -18,14 +18,6 @@ public class RequestController {
 
     public static Function<HttpRequest, HttpResponse> login = request -> {
 
-<<<<<<< HEAD
-        // HTTP request에서 body가 없을 경우
-        if(!request.method.equals("POST")){
-            return new HttpResponse("400 Bad Request", "");
-        }
-
-=======
->>>>>>> d8561b4 (로그인 테스트용 클라이언트 추가)
         // HTTP request에서 body의 JSON을 parse
         String requestId, requestPassword;
         JSONObject jsonObject = new JSONObject(request.body);
@@ -49,11 +41,7 @@ public class RequestController {
 
         // 로그인 성공! -> 세션 생성
         HttpResponse httpResponse = new HttpResponse("200 OK", "login success");
-<<<<<<< HEAD
-        UUID uuid = UUID.randomUUID(); // java.util.UUID(Universally Unique IDentifier)
-=======
         UUID uuid = UUID.randomUUID();
->>>>>>> d8561b4 (로그인 테스트용 클라이언트 추가)
         sessionContext.put(uuid.toString(), requestId);
 
         // 쿠키 생성
