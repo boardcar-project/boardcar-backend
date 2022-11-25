@@ -30,7 +30,7 @@ public class RequestController {
             MemberVO requestMember = memberDAO.getMemberById(requestId);
 
             // PW가 틀린 경우
-            if(!requestMember.getPASSWORD().equals(requestPassword)){
+            if(!requestMember.getPassword().equals(requestPassword)){
                 return new HttpResponse("400 Bad Request", "login failed (mismatch PASSWORD)");
             }
         } catch (SQLException e) {

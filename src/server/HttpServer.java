@@ -148,13 +148,13 @@ public class HttpServer {
         // PATH MAP
         Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
             {
-                put("/httpTest", Controller.httpTest);
-                put("/login", Controller.login);
-                put("/member", Controller.member);
+                put("/httpTest", RequestController.httpTest);
+                put("/login", RequestController.login);
+                put("/member", RequestController.member);
             }
         };
 
-        return dispatcherTable.getOrDefault(httpRequest.path, Controller.other).apply(httpRequest);
+        return dispatcherTable.getOrDefault(httpRequest.path, RequestController.other).apply(httpRequest);
 
     }
 }
