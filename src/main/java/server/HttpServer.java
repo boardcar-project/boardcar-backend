@@ -1,12 +1,12 @@
 package server;
 
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,22 +33,23 @@ public class HttpServer {
         }
         SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
-        logger.info("Server start (PORT : " + SERVER_PORT + ")");
 
         // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
-            Socket connection;
+            logger.info("Server start (PORT : " + SERVER_PORT + ")");
 
-            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            // 클라이언트 연결 요청 대기
+            Socket connection;
+            ExecutorService executorService = Executors.newFixedThreadPool(10); // newCachedThreadPool()? https://codechacha.com/ko/java-executors/
             while ((connection = serverSocket.accept()) != null) {
-                Socket finalConnection = connection;
+                Socket clientConnection = connection;
 
                 logger.info("Client Connected");
-
-                executorService.submit(() -> requestHandler(finalConnection));
+                executorService.submit(() -> requestHandler(clientConnection));
             }
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -73,6 +74,7 @@ public class HttpServer {
             try {
                 connection.close();
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
@@ -80,28 +82,34 @@ public class HttpServer {
     }
 
     private static HttpRequest requestBuilder(InputStream inputStream) throws IOException {
-
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         // HTTP 요청 전체 읽기
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         String inputLine;
-        while (!(inputLine = myReadLine(inputStream)).equals("")) {
-            sb.append(inputLine).append("\r\n"); // sb : HTTP 요청 전체
+
+        /*
+        * BufferedReader.ready() ?? https://stackoverflow.com/questions/15521352/bufferedreader-readline-blocks
+        * */
+        while (bufferedReader.ready() && ((inputLine = bufferedReader.readLine()) != null)) {
+//            System.out.println(inputLine);
+            stringBuilder.append(inputLine).append(System.lineSeparator()); // sb : HTTP 요청 전체
         }
 
         // HTTP 요청 한 줄씩 처리
-        String request = sb.toString();
-        String[] requestArr = request.split("\r\n"); // \n으로 split -> 한 줄씩 나눔
+        String request = stringBuilder.toString();
+        String[] requestArr = request.split(System.lineSeparator()); // \n으로 split -> 한 줄씩 나눔
 
         // 헤더 - 요청 부분 parse
         String requestInfo = requestArr[0]; // requestArr[0] : 요청 전체
         String[] requestInfoArr = requestInfo.split(" ");
         String method = requestInfoArr[0];
         String path = requestInfoArr[1];
-        String version = requestInfoArr[1];
+        String version = requestInfoArr[2];
 
         // 남은 헤더 parse
         Map<String, String> headers = new HashMap<>();
-        for (int i = 1; i < requestArr.length; ++i) {
+        int i;
+        for (i = 1; i < requestArr.length; i++) {
             if (requestArr[i].equals("")) { // 아무것도 없는 줄을 만난다 -> 헤더의 끝을 만남
                 break;
             }
@@ -111,32 +119,44 @@ public class HttpServer {
             headers.put(temp[0].trim(), temp[1].trim());
         }
 
-        // 바디 parse
-        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
-        for (int i = 0; i < contentLength; i++) {
-            byteBuffer.put((byte) inputStream.read());
+        stringBuilder = new StringBuilder();
+        for(i++; i < requestArr.length; i++){
+            stringBuilder.append(requestArr[i]).append(System.lineSeparator());
         }
-        String body = new String(byteBuffer.array(), StandardCharsets.UTF_8).trim();
+        String body = stringBuilder.toString();
 
-        return new HttpRequest(method, path, version, headers, body);
+//        // 바디 parse
+//        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+//
+//        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+//        for (int i = 0; i < contentLength; i++) {
+//            byteBuffer.put((byte) inputStream.read());
+//        }
+//        String body = new String(byteBuffer.array(), StandardCharsets.UTF_8).trim();
+
+        return HttpRequest.builder()
+                .method(method)
+                .path(path)
+                .version(version)
+                .headers(headers)
+                .body(body)
+                .build();
     }
 
-    private static String myReadLine(InputStream inputStream) throws IOException {
-        byte[] bytes = new byte[2048];
-        int idx = 0;
-        while (true) {
-            bytes[idx] = (byte) inputStream.read();
-
-            if (bytes[idx] == '\n' || bytes[idx] == '\0') {
-                break;
-            }
-
-            idx++;
-        }
-        return new String(bytes, StandardCharsets.UTF_8).trim();
-    }
+//    private static String myReadLine(InputStream inputStream) throws IOException {
+//        byte[] bytes = new byte[2048];
+//        int idx = 0;
+//        while (true) {
+//            bytes[idx] = (byte) inputStream.read();
+//
+//            if (bytes[idx] == '\n' || bytes[idx] == '\0') {
+//                break;
+//            }
+//
+//            idx++;
+//        }
+//        return new String(bytes, StandardCharsets.UTF_8).trim();
+//    }
 
 // 서버와 클라 사이에 약속된 id로 서버에 원하는 상태를 저장한다.
 // /login api로 id와 pw를 넘겨주면 우리가 클라이언트 쿠키에 서버에서 생성한 UID를 내려준다.
@@ -145,7 +165,6 @@ public class HttpServer {
 
     private static HttpResponse requestDispatcher(HttpRequest httpRequest) {
 
-        // PATH MAP
         Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
             {
                 put("/httpTest", RequestController.httpTest);
@@ -155,78 +174,55 @@ public class HttpServer {
         };
 
         return dispatcherTable.getOrDefault(httpRequest.path, RequestController.other).apply(httpRequest);
-
     }
 }
-
+@Builder
 class HttpRequest {
     String method;
     String path;
     String version;
     Map<String, String> headers;
-    Map<String, String> cookie;
     String body;
-
-    public HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
-        this.headers = headers;
-        this.cookie = new HashMap<>();
-//        Optionof 알아보기
-
-        String cookieStr = headers.getOrDefault("Cookie", null);
-        if (cookieStr != null && !cookieStr.trim().isEmpty()) {
-            for (String property : cookieStr.split(";")) {
-                String[] keyAndValue = property.split("=");
-                cookie.put(keyAndValue[0], keyAndValue[1]);
-            }
-        }
-
-        this.body = body;
-    }
-
-    public String getCookie(String key) {
-        return cookie.getOrDefault(key, null);
-    }
 }
 
+@Builder
+@Getter
+@Setter
 class HttpResponse {
-    String status;
-    String body;
-    Map<String, String> cookie = new HashMap<>();
+    @Builder.Default
+    String version = "HTTP/1.1";
+    String statusCode;
+    String statusText;
+    @Builder.Default
+    Map<String, String> headers = new HashMap<String, String>(){
+        {
+            put("Content-Type", "text/html;charset=utf-8");
+        }
+    };
+    @Builder.Default
+    String body = null;
 
-    public HttpResponse(String status, String body) {
-        this.status = status;
-        this.body = body;
-    }
-
-    public void setCookie(String key, String value) {
-        cookie.put(key, value);
-    }
-
-    private String cookieToString() {
-        StringBuilder sb = new StringBuilder();
-        cookie.forEach((k, v) -> {
-            sb.append(k).append("=").append(v).append(";");
-        });
-
-        return sb.toString();
+    public void setHeaders(String header, String value){
+        headers.put(header,value);
     }
 
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("HTTP/1.1 ").append(status).append(" \r\n");
-        stringBuilder.append("Content-Type: text/html;charset=utf-8\r\n");
-        stringBuilder.append("Content-Length: ").append(body.length()).append("\r\n");
+        // status line
+        stringBuilder.append(version).append(" ").append(statusCode).append(" ").append(statusText).append(System.lineSeparator());
 
-        if (!cookie.isEmpty()) {
-            stringBuilder.append("Set-Cookie:").append(cookieToString()).append("\r\n");
+        // headers
+        if(body != null){
+            headers.put("Content-Length", String.valueOf(body.length()));
         }
+        headers.forEach((header, value) -> {
+            stringBuilder.append(header).append(": ").append(value).append(System.lineSeparator());
+        });
+        stringBuilder.append(System.lineSeparator());
 
-        stringBuilder.append("\r\n");
+        // body
         stringBuilder.append(body);
 
         return stringBuilder.toString();

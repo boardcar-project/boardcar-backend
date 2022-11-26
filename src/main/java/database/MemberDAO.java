@@ -26,7 +26,6 @@ public class MemberDAO {
 
         PreparedStatement sqlQuery;
 
-
         sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
         sqlQuery.setString(1, mid);
 
