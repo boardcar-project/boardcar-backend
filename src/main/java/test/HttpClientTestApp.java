@@ -68,8 +68,8 @@ public class HttpClientTestApp {
     public static void main(String[] args) {
 
 
-        getTest_httpTest();
-//        postTest_login();
+//        getTest_httpTest();
+        postTest_login();
 //        getTest_member();
 
     }
@@ -96,8 +96,7 @@ public class HttpClientTestApp {
             Socket socket = new Socket(SERVER_IP, SERVER_PORT); // 서버 연결
 
             // 서버에 Request 보내기
-            String requestPacket = packetBuilder(httpRequest);
-            socket.getOutputStream().write(requestPacket.getBytes(StandardCharsets.UTF_8));
+            socket.getOutputStream().write(httpRequest.toString().getBytes(StandardCharsets.UTF_8));
             socket.getOutputStream().flush();
 
             // 서버로부터 Response 받기
@@ -152,45 +151,41 @@ public class HttpClientTestApp {
                 .build();
     }
 
-
-    public static String packetBuilder(HttpRequest httpRequest) {
-        StringBuilder stringBuilder = new StringBuilder();
-        String version = "HTTP/1.1";
-
-        // start-line
-        stringBuilder.append(httpRequest.method).append(" ").append(httpRequest.path).append(" ").append(version).append(System.lineSeparator());
-
-        // headers
-        if(httpRequest.headers != null){
-            httpRequest.headers.forEach((header, value) -> {
-                stringBuilder.append(header).append(": ").append(value).append(System.lineSeparator());
-            });
-        }
-        stringBuilder.append(System.lineSeparator());
-
-        // body
-        if (!httpRequest.method.equals("GET")) { // GET은 body가 없음
-            stringBuilder.append(httpRequest.body).append("\r\n");
-        }
-
-        return stringBuilder.toString();
-    }
-
 }
 
 @Builder
 class HttpRequest {
     String method;
     String path;
-    String version;
+    @Builder.Default
+    String version = "HTTP/1.1";
     @Builder.Default
     Map<String, String> headers = new HashMap<>();
     @Builder.Default
     String body = null;
 
-//    public void setSessionKey(String sessionKey) {
-//        headers.put("Session-Key", sessionKey);
-//    }
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // start-line
+        stringBuilder.append(method).append(" ").append(path).append(" ").append(version).append(System.lineSeparator());
+
+        // headers
+        if(headers != null){
+            headers.forEach((header, value) -> {
+                stringBuilder.append(header).append(": ").append(value).append(System.lineSeparator());
+            });
+        }
+        stringBuilder.append(System.lineSeparator());
+
+        // body
+        if (!method.equals("GET")) { // GET은 body가 없음
+            stringBuilder.append(body).append("\r\n");
+        }
+
+        return stringBuilder.toString();
+    }
 }
 
 @Builder
