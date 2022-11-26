@@ -3,6 +3,7 @@
 
 ## Feature
 * HTTP Server
+* Session
 * OracleDB DML
 
 ## Implementation requirements
