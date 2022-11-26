@@ -1,5 +1,3 @@
-package test;
-
 import database.MemberDAO;
 import database.MemberVO;
 

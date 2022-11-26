@@ -1,5 +1,3 @@
-package test;
-
 import lombok.Builder;
 import org.json.JSONObject;
 
@@ -68,8 +66,8 @@ public class HttpClientTestApp {
     public static void main(String[] args) {
 
 
-//        getTest_httpTest();
-        postTest_login();
+        getTest_httpTest();
+//        postTest_login();
 //        getTest_member();
 
     }
