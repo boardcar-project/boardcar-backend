@@ -22,12 +22,12 @@ public class MemberDAO {
         }
     }
 
-    public MemberVO getMemberById(String mid) throws SQLException {
+    public MemberVO getMemberById(String MID) throws SQLException {
 
         PreparedStatement sqlQuery;
 
-        sqlQuery = this.connection.prepareStatement("select * from member where mid = ?");
-        sqlQuery.setString(1, mid);
+        sqlQuery = this.connection.prepareStatement("SELECT * FROM MEMBER WHERE MID = ?");
+        sqlQuery.setString(1, MID);
 
         ResultSet resultSet = sqlQuery.executeQuery();
         resultSet.next();
@@ -37,23 +37,27 @@ public class MemberDAO {
 
     }
 
-    public List<MemberVO> getMemberVOList() {
+    public List<MemberVO> getMemberVOList() throws SQLException {
 
         List<MemberVO> memberVOList = new LinkedList<>();
 
-        try {
-            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
+        PreparedStatement sqlQuery = this.connection.prepareStatement("SELECT * FROM MEMBER");
 
-            ResultSet resultSet = sqlQuery.executeQuery();
-            while (resultSet.next()) {
-                memberVOList.add(new MemberVO(resultSet));
-            }
-
-            return memberVOList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        ResultSet resultSet = sqlQuery.executeQuery();
+        while (resultSet.next()) {
+            memberVOList.add(new MemberVO(resultSet));
         }
 
+        return memberVOList;
+
+    }
+
+    public int updateMemberPassword(String MID, String PASSWORD) throws SQLException {
+
+        PreparedStatement sqlQuery = this.connection.prepareStatement("UPDATE MEMBER SET PASSWORD=? WHERE MID=?");
+        sqlQuery.setString(1, PASSWORD);
+        sqlQuery.setString(2, MID);
+
+        return sqlQuery.executeUpdate();
     }
 }

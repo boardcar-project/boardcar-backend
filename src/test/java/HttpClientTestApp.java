@@ -14,16 +14,21 @@ import java.util.Properties;
 
 public class HttpClientTestApp {
 
+    public static final String TEST_ID = "testid";
+    public static final String TEST_PASSWORD = "testpw";
+    public static final String TEST_NEW_PASSWORD = "testpw2";
+
     public static String sessionKey = null;
 
     public static void main(String[] args) throws IOException {
 
-        TestMethod.getTest_httpTest();
-        TestMethod.postTest_login();
-        TestMethod.getTest_member();
+        TestMethod.gethttpTest();
+        TestMethod.postLogin();
+        TestMethod.getMembers();
+        TestMethod.getMyInfo();
+        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
 
     }
-
 
     public static HttpResponse sendHttpRequest(HttpRequest httpRequest) throws IOException {
 
@@ -99,7 +104,7 @@ public class HttpClientTestApp {
             body = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
         }
 
-        return new HttpResponse(version ,statusCode, statusText, headers, body);
+        return new HttpResponse(version, statusCode, statusText, headers, body);
     }
 
     private static String myReadLine(InputStream inputStream) throws IOException {
@@ -121,11 +126,11 @@ public class HttpClientTestApp {
 class TestMethod {
 
     private static String version = "HTTP/1.1";
-    private static Map<String, String> headers = new HashMap<String, String>(){{
+    private static Map<String, String> headers = new HashMap<String, String>() {{
         put("Content-Type", "text/html;charset=utf-8");
     }};
 
-    public static void getTest_httpTest() throws IOException {
+    public static void gethttpTest() throws IOException {
         /* GET TEST */
         HttpRequest testRequest = new HttpRequest("GET", "/httpTest", version, headers, "");
 
@@ -136,17 +141,18 @@ class TestMethod {
         System.out.println();
     }
 
-    public static void postTest_login() throws IOException {
+    public static void postLogin() throws IOException {
         /* POST TEST */
 
         // 로그인 정보 JSON 생성
         JSONObject loginJson = new JSONObject();
-        loginJson.put("id", "testid");
-        loginJson.put("password", "testpw");
-        String loginInfo = loginJson.toString();
+        loginJson.put("id", HttpClientTestApp.TEST_ID);
+        loginJson.put("password", HttpClientTestApp.TEST_PASSWORD);
 
-        HttpRequest loginRequest = new HttpRequest("POST", "/login", version, headers, loginInfo);
+        // 요청
+        HttpRequest loginRequest = new HttpRequest("POST", "/login", version, headers, loginJson.toString());
 
+        // 응답
         HttpResponse loginResponse = HttpClientTestApp.sendHttpRequest(loginRequest);
         if (loginResponse.getStatusCode().equals("200")) {
             HttpClientTestApp.sessionKey = loginResponse.getHeaders().get("Session-Key");
@@ -158,18 +164,55 @@ class TestMethod {
         System.out.println();
     }
 
-    public static void getTest_member() throws IOException {
+    public static void getMembers() throws IOException {
         /* GET TEST - 멤버 테이블 전체 가져오기 */
 
-        HttpRequest memberListRequest = new HttpRequest("GET", "/member", version, headers, "");
+        HttpRequest memberListRequest = new HttpRequest("GET", "/members", version, headers, "");
         memberListRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
 
         HttpResponse memberListResponse = HttpClientTestApp.sendHttpRequest(memberListRequest);
 
         System.out.println("Response Status : " + memberListResponse.getStatusCode());
-        System.out.println(memberListResponse.getBody());
+
+        String[] memberList = memberListResponse.getBody().split("\n");
+        for(String member : memberList){
+            System.out.println(member);
+        }
+        System.out.println();
+
+    }
+
+    public static void getMyInfo() throws IOException {
+        /* GET TEST - 자신의 정보 가져오기 */
+
+        HttpRequest infoRequest = new HttpRequest("GET", "/myInfo", version, headers, "");
+        infoRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
+
+        HttpResponse infoResponse = HttpClientTestApp.sendHttpRequest(infoRequest);
+
+        System.out.println("Response Status : " + infoResponse.getStatusCode());
+        System.out.println(infoResponse.getBody());
+
         System.out.println();
     }
 
+    public static void postChangeMyPassword(String newPassword) throws IOException {
+        /* POST TEST - 자신의 비밀번호 변경 */
+
+        // body json에서 변경할 비밀번호 parse
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("password", newPassword);
+
+        // 요청
+        HttpRequest changePasswordRequest = new HttpRequest("PATCH", "/changePassword", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse changePasswordResponse = HttpClientTestApp.sendHttpRequest(changePasswordRequest);
+        System.out.println("Response Status : " + changePasswordResponse.getStatusCode());
+        System.out.println(changePasswordResponse.getBody());
+
+        System.out.println();
+
+    }
 }
 
