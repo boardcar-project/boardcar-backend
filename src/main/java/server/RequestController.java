@@ -2,6 +2,8 @@ package server;
 
 import database.MemberDAO;
 import database.MemberVO;
+import http.HttpRequest;
+import http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,31 +16,27 @@ import java.util.function.Function;
 
 public class RequestController {
     public static Map<String, String> sessionContext = new HashMap<>();
+    public static Map<String, String> headers = new HashMap<String, String>(){
+        {
+            put("Server", "boardcar-server");
+        }
+    };
 
     public static Function<HttpRequest, HttpResponse> httpTest = request -> {
-
-        return HttpResponse.builder()
-                .statusCode("200")
-                .statusText("OK")
-                .body("httpTest Success")
-                .build();
+        return HttpResponse.ok(headers, "httpTest Success");
     };
     public static Function<HttpRequest, HttpResponse> login = request -> {
 
         // HTTP request에서 body의 JSON을 parse
         String id, password;
         try {
-            JSONObject jsonObject = new JSONObject(request.body);
+            JSONObject jsonObject = new JSONObject(request.getBody());
             id = jsonObject.getString("id");
             password = jsonObject.getString("password");
         } catch (JSONException e) {
-            // body가 잘못 되었을 때
+            // JSON가 잘못 되었을 때
             e.printStackTrace();
-            return HttpResponse.builder()
-                    .statusCode("400")
-                    .statusText("Bad Request")
-                    .body("invalid body")
-                    .build();
+            return HttpResponse.badRequest(headers, "Invalid body (JSON format)");
         }
 
         // DB에서 회원 ID 찾기
@@ -48,71 +46,46 @@ public class RequestController {
 
             // PW가 틀린 경우
             if (!requestMember.getPassword().equals(password)) {
-                return HttpResponse.builder()
-                        .statusCode("400")
-                        .statusText("Bad Request")
-                        .body("login failed (mismatch PASSWORD)")
-                        .build();
+                return HttpResponse.badRequest(headers, "login failed (mismatch PASSWORD)");
             }
         } catch (SQLException e) {
             // ID를 찾지 못했을 때
             e.printStackTrace();
-            return HttpResponse.builder()
-                    .statusCode("400")
-                    .statusText("Bad Request")
-                    .body("login failed (not found ID)")
-                    .build();
+            return HttpResponse.badRequest(headers, "login failed (not found ID)");
         }
 
         // 로그인 성공! -> 세션 생성
         UUID uuid = UUID.randomUUID();
         sessionContext.put(uuid.toString(), id);
 
-        // Response 생성
-        HttpResponse httpResponse = HttpResponse.builder()
-                .statusCode("200")
-                .statusText("OK")
-                .body("login success")
-                .build();
-        httpResponse.setHeaders("Session-Key", uuid.toString());
+        // 헤더에 추가
+        headers.put("Session-Key", uuid.toString());
 
-        return httpResponse;
+        return HttpResponse.ok(headers, "login success");
     };
 
     public static Function<HttpRequest, HttpResponse> member = request -> {
 
         // 세션 체크
-        String sessionKey = request.headers.get("Session-Key");
+        String sessionKey = request.getHeaders().get("Session-Key");
         if (!sessionContext.containsKey(sessionKey) || sessionKey == null) {
-            return HttpResponse.builder()
-                    .statusCode("400")
-                    .statusText("Bad Request")
-                    .body("please login before access DB")
-                    .build();
+            return HttpResponse.badRequest(headers,"please login before access DB");
         }
 
         // DB에서 member 정보 가져오기
         MemberDAO memberDAO = new MemberDAO();
         List<MemberVO> memberVOList = memberDAO.getMemberVOList();
 
-        // body 만들기
+        // member 정보를 가진 body 만들기
         StringBuilder bodyBuilder = new StringBuilder();
         for (MemberVO memberVO : memberVOList) {
-            bodyBuilder.append(memberVO.toString()).append(System.lineSeparator());
+            bodyBuilder.append(memberVO.toString()).append("\n");
         }
 
-        return HttpResponse.builder()
-                .statusCode("200")
-                .statusText("OK")
-                .body(bodyBuilder.toString())
-                .build();
+        return HttpResponse.ok(headers, bodyBuilder.toString());
     };
 
     public static Function<HttpRequest, HttpResponse> other = request -> {
-        return HttpResponse.builder()
-                .statusCode("404")
-                .statusText("Not found")
-                .body("Wrong API access")
-                .build();
+        return HttpResponse.notFound(headers, "Wrong API access");
     };
 }
