@@ -1,14 +1,16 @@
 package server;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -21,18 +23,12 @@ public class HttpServer {
 
     private static final Logger logger = Logger.getLogger("ServerLogger");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         // PORT 번호 읽기
-        final int SERVER_PORT;
         Properties properties = new Properties();
-        try {
-            properties.load(new FileInputStream(".properties"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
-
+        properties.load(Files.newInputStream(Paths.get(".properties")));
+        final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
@@ -84,22 +80,21 @@ public class HttpServer {
     private static HttpRequest requestBuilder(InputStream inputStream) throws IOException {
 
         // HTTP 요청 전체 읽기
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         String inputLine;
         while (!(inputLine = myReadLine(inputStream)).equals("")) {
-            sb.append(inputLine).append(System.lineSeparator()); // sb : HTTP 요청 전체
+            stringBuilder.append(inputLine).append(System.lineSeparator()); // stringBuilder : HTTP 요청 전체
         }
 
         // HTTP 요청 한 줄씩 처리
-        String request = sb.toString();
+        String request = stringBuilder.toString();
         String[] requestArr = request.split(System.lineSeparator()); // \n으로 split -> 한 줄씩 나눔
 
         // 헤더 - 요청 부분 parse
-        String requestInfo = requestArr[0]; // requestArr[0] : 요청 전체
-        String[] requestInfoArr = requestInfo.split(" ");
-        String method = requestInfoArr[0];
-        String path = requestInfoArr[1];
-        String version = requestInfoArr[1];
+        String[] requestInfo = requestArr[0].split(" ");
+        String method = requestInfo[0];
+        String path = requestInfo[1];
+        String version = requestInfo[2];
 
         // 남은 헤더 parse
         Map<String, String> headers = new HashMap<>();
@@ -118,12 +113,11 @@ public class HttpServer {
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         if (contentLength > 0) {
 
-            ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             for (int i = 0; i < contentLength; i++) {
-                int b = inputStream.read();
-                tmp.write(b);
+                byteArrayOutputStream.write(inputStream.read());
             }
-            body = new String(tmp.toByteArray(), StandardCharsets.UTF_8);
+            body = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
         }
 
         return HttpRequest.builder()
@@ -179,8 +173,6 @@ class HttpRequest {
 }
 
 @Builder
-@Getter
-@Setter
 class HttpResponse {
     @Builder.Default
     String version = "HTTP/1.1";
