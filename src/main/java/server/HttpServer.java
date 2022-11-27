@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.logging.Logger;
-
 
 public class HttpServer {
 
@@ -45,7 +45,7 @@ public class HttpServer {
                 Socket clientConnection = connection;
 
                 logger.info("Client Connected");
-                executorService.submit(() -> requestHandler(clientConnection));
+                executorService.submit(() -> requestHandler(clientConnection)); // 클라이언트와 통신 쓰레드
             }
 
         } catch (IOException e) {
@@ -82,21 +82,16 @@ public class HttpServer {
     }
 
     private static HttpRequest requestBuilder(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        // HTTP 요청 전체 읽기
-        StringBuilder stringBuilder = new StringBuilder();
-        String inputLine;
 
-        /*
-        * BufferedReader.ready() ?? https://stackoverflow.com/questions/15521352/bufferedreader-readline-blocks
-        * */
-        while (bufferedReader.ready() && ((inputLine = bufferedReader.readLine()) != null)) {
-//            System.out.println(inputLine);
-            stringBuilder.append(inputLine).append(System.lineSeparator()); // sb : HTTP 요청 전체
+        // HTTP 요청 전체 읽기
+        StringBuilder sb = new StringBuilder();
+        String inputLine;
+        while (!(inputLine = myReadLine(inputStream)).equals("")) {
+            sb.append(inputLine).append(System.lineSeparator()); // sb : HTTP 요청 전체
         }
 
         // HTTP 요청 한 줄씩 처리
-        String request = stringBuilder.toString();
+        String request = sb.toString();
         String[] requestArr = request.split(System.lineSeparator()); // \n으로 split -> 한 줄씩 나눔
 
         // 헤더 - 요청 부분 parse
@@ -104,12 +99,11 @@ public class HttpServer {
         String[] requestInfoArr = requestInfo.split(" ");
         String method = requestInfoArr[0];
         String path = requestInfoArr[1];
-        String version = requestInfoArr[2];
+        String version = requestInfoArr[1];
 
         // 남은 헤더 parse
         Map<String, String> headers = new HashMap<>();
-        int i;
-        for (i = 1; i < requestArr.length; i++) {
+        for (int i = 1; i < requestArr.length; ++i) {
             if (requestArr[i].equals("")) { // 아무것도 없는 줄을 만난다 -> 헤더의 끝을 만남
                 break;
             }
@@ -119,20 +113,18 @@ public class HttpServer {
             headers.put(temp[0].trim(), temp[1].trim());
         }
 
-        stringBuilder = new StringBuilder();
-        for(i++; i < requestArr.length; i++){
-            stringBuilder.append(requestArr[i]).append(System.lineSeparator());
-        }
-        String body = stringBuilder.toString();
+        // 바디 parse
+        String body = null;
+        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+        if (contentLength > 0) {
 
-//        // 바디 parse
-//        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-//
-//        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
-//        for (int i = 0; i < contentLength; i++) {
-//            byteBuffer.put((byte) inputStream.read());
-//        }
-//        String body = new String(byteBuffer.array(), StandardCharsets.UTF_8).trim();
+            ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+            for (int i = 0; i < contentLength; i++) {
+                int b = inputStream.read();
+                tmp.write(b);
+            }
+            body = new String(tmp.toByteArray(), StandardCharsets.UTF_8);
+        }
 
         return HttpRequest.builder()
                 .method(method)
@@ -143,20 +135,20 @@ public class HttpServer {
                 .build();
     }
 
-//    private static String myReadLine(InputStream inputStream) throws IOException {
-//        byte[] bytes = new byte[2048];
-//        int idx = 0;
-//        while (true) {
-//            bytes[idx] = (byte) inputStream.read();
-//
-//            if (bytes[idx] == '\n' || bytes[idx] == '\0') {
-//                break;
-//            }
-//
-//            idx++;
-//        }
-//        return new String(bytes, StandardCharsets.UTF_8).trim();
-//    }
+    private static String myReadLine(InputStream inputStream) throws IOException {
+        byte[] bytes = new byte[2048];
+        int idx = 0;
+        while (true) {
+            bytes[idx] = (byte) inputStream.read();
+
+            if (bytes[idx] == '\n' || bytes[idx] == '\0') {
+                break;
+            }
+
+            idx++;
+        }
+        return new String(bytes, StandardCharsets.UTF_8).trim();
+    }
 
 // 서버와 클라 사이에 약속된 id로 서버에 원하는 상태를 저장한다.
 // /login api로 id와 pw를 넘겨주면 우리가 클라이언트 쿠키에 서버에서 생성한 UID를 내려준다.
@@ -202,8 +194,8 @@ class HttpResponse {
     @Builder.Default
     String body = null;
 
-    public void setHeaders(String header, String value){
-        headers.put(header,value);
+    public void setHeaders(String header, String value) {
+        headers.put(header, value);
     }
 
     @Override
@@ -228,3 +220,4 @@ class HttpResponse {
         return stringBuilder.toString();
     }
 }
+

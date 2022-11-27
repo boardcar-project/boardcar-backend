@@ -3,6 +3,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,63 +13,11 @@ public class HttpClientTestApp {
 
     public static String sessionKey = null;
 
-    public static void getTest_httpTest() {
-        /* GET TEST */
-        HttpRequest testRequest = HttpRequest.builder()
-                .method("GET")
-                .path("/httpTest")
-                .version("HTTP/1.1")
-                .build();
-        HttpResponse testResponse = sendHttpRequest(testRequest);
-        System.out.println("Response Status : " + testResponse.statusCode);
-        System.out.println(testResponse.body);
-    }
-
-    public static void postTest_login() {
-        /* POST TEST */
-        // 로그인 정보 JSON 생성
-        JSONObject loginJson = new JSONObject();
-        loginJson.put("id", "testid");
-        loginJson.put("password", "testpw");
-        String body = loginJson.toString();
-
-        HttpRequest loginRequest = HttpRequest.builder()
-                .method("POST")
-                .path("/login")
-                .version("HTTP/1.1")
-                .body(body)
-                .build();
-        HttpResponse loginResponse = sendHttpRequest(loginRequest);
-        if (loginResponse.statusCode.equals("200")) {
-            sessionKey = loginResponse.headers.get("Session-Key");
-        }
-
-        System.out.println("Response Status : " + loginResponse.statusCode);
-        System.out.println(loginResponse.body);
-        System.out.println("Session-Key is " + sessionKey);
-    }
-
-    public static void getTest_member() {
-        /* GET TEST */
-        // 멤버 테이블 전체 가져오기
-        HttpRequest memberListRequest = HttpRequest.builder()
-                .method("GET")
-                .path("/member")
-                .version("HTTP/1.1")
-                .build();
-//        memberListRequest.setSessionKey(sessionKey); // httpRequest에 Cookie 헤더 넣기
-
-        HttpResponse memberListResponse = sendHttpRequest(memberListRequest);
-        System.out.println("Response Status : " + memberListResponse.statusCode);
-        System.out.println(memberListResponse.body);
-    }
-
     public static void main(String[] args) {
 
-
-        getTest_httpTest();
-//        postTest_login();
-//        getTest_member();
+        TestMethod.getTest_httpTest();
+        TestMethod.postTest_login();
+        TestMethod.getTest_member();
 
     }
 
@@ -110,35 +59,48 @@ public class HttpClientTestApp {
     }
 
     private static HttpResponse responseBuilder(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-        // HTTP 패킷 전체 수신
+        // HTTP 요청 전체 읽기
         StringBuilder stringBuilder = new StringBuilder();
         String inputLine;
-        while ((inputLine = bufferedReader.readLine()) != null) {
-            stringBuilder.append(inputLine).append(System.lineSeparator());
+        while (!(inputLine = myReadLine(inputStream)).equals("")) {
+            stringBuilder.append(inputLine).append(System.lineSeparator()); // sb : HTTP 요청 전체
         }
 
-        // HTTP response packet parse
+        // HTTP 요청 한 줄씩 처리
         String response = stringBuilder.toString();
         String[] responseArr = response.split(System.lineSeparator());
 
-        // status line
+        // 헤더 - 요청 부분 parse
         String[] statusLine = responseArr[0].split(" ");
         String version = statusLine[0];
         String statusCode = statusLine[1];
         String statusText = statusLine[2];
 
-        // headers
+        // 남은 헤더 parse
         Map<String, String> headers = new HashMap<>();
-        int i;
-        for (i = 1; !responseArr[i].equals(""); i++) {
-            String[] headerEntry = responseArr[i].split(":");
-            headers.put(headerEntry[0].trim(), headerEntry[1].trim());
+        for (int i = 1; i < responseArr.length; ++i) {
+            if (responseArr[i].equals("")) { // 아무것도 없는 줄을 만난다 -> 헤더의 끝을 만남
+                break;
+            }
+
+            // 헤더의 (키:값)을 해시맵에 저장
+            String[] temp = responseArr[i].split(":");
+            headers.put(temp[0].trim(), temp[1].trim());
         }
 
-        // body
-        String body = responseArr[++i]; // i : headers body 구분자(\r\n)
+        // 바디 parse
+        String body = null;
+        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+        if (contentLength > 0) {
+
+            ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+            for (int i = 0; i < contentLength; i++) {
+                int b = inputStream.read();
+                tmp.write(b);
+            }
+            body = new String(tmp.toByteArray(), StandardCharsets.UTF_8);
+        }
 
         return HttpResponse.builder()
                 .version(version)
@@ -147,6 +109,21 @@ public class HttpClientTestApp {
                 .headers(headers)
                 .body(body)
                 .build();
+    }
+
+    private static String myReadLine(InputStream inputStream) throws IOException {
+        byte[] bytes = new byte[2048];
+        int idx = 0;
+        while (true) {
+            bytes[idx] = (byte) inputStream.read();
+
+            if (bytes[idx] == '\n' || bytes[idx] == '\0') {
+                break;
+            }
+
+            idx++;
+        }
+        return new String(bytes, StandardCharsets.UTF_8).trim();
     }
 
 }
@@ -162,6 +139,11 @@ class HttpRequest {
     @Builder.Default
     String body = null;
 
+
+    public void setHeaders(String header, String value) {
+        headers.put(header, value);
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -170,7 +152,10 @@ class HttpRequest {
         stringBuilder.append(method).append(" ").append(path).append(" ").append(version).append(System.lineSeparator());
 
         // headers
-        if(headers != null){
+        if (body != null) {
+            headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        }
+        if (headers != null) {
             headers.forEach((header, value) -> {
                 stringBuilder.append(header).append(": ").append(value).append(System.lineSeparator());
             });
@@ -193,5 +178,66 @@ class HttpResponse {
     String statusText;
     Map<String, String> headers;
     String body;
+}
+
+class TestMethod{
+    public static void getTest_httpTest() {
+        /* GET TEST */
+        HttpRequest testRequest = HttpRequest.builder()
+                .method("GET")
+                .path("/httpTest")
+                .version("HTTP/1.1")
+                .build();
+
+        HttpResponse testResponse = HttpClientTestApp.sendHttpRequest(testRequest);
+        System.out.println("Response Status : " + testResponse.statusCode);
+        System.out.println(testResponse.body);
+        System.out.println();
+    }
+
+    public static void postTest_login() {
+        /* POST TEST */
+
+        // 로그인 정보 JSON 생성
+        JSONObject loginJson = new JSONObject();
+        loginJson.put("id", "testid");
+        loginJson.put("password", "testpw");
+        String body = loginJson.toString();
+
+        HttpRequest loginRequest = HttpRequest.builder()
+                .method("POST")
+                .path("/login")
+                .version("HTTP/1.1")
+                .body(body)
+                .build();
+
+        HttpResponse loginResponse = HttpClientTestApp.sendHttpRequest(loginRequest);
+        if (loginResponse.statusCode.equals("200")) {
+            HttpClientTestApp.sessionKey = loginResponse.headers.get("Session-Key");
+        }
+
+        System.out.println("Response Status : " + loginResponse.statusCode);
+        System.out.println(loginResponse.body);
+        System.out.println("Session-Key is " + HttpClientTestApp.sessionKey);
+        System.out.println();
+    }
+
+    public static void getTest_member() {
+        /* GET TEST - 멤버 테이블 전체 가져오기 */
+
+        HttpRequest memberListRequest = HttpRequest.builder()
+                .method("GET")
+                .path("/member")
+                .version("HTTP/1.1")
+                .build();
+        memberListRequest.setHeaders("Session-Key", HttpClientTestApp.sessionKey);
+
+        HttpResponse memberListResponse = HttpClientTestApp.sendHttpRequest(memberListRequest);
+
+        System.out.println("Response Status : " + memberListResponse.statusCode);
+        System.out.println(memberListResponse.body);
+        System.out.println();
+    }
+
 }
 

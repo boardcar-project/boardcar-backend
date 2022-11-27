@@ -69,7 +69,6 @@ public class RequestController {
                 .build();
         UUID uuid = UUID.randomUUID();
         sessionContext.put(uuid.toString(), id);
-        System.out.println(uuid);
 
         // Response header에 세션 키 추가
         httpResponse.setHeaders("Session-Key", uuid.toString());
