@@ -14,6 +14,10 @@ import java.util.Properties;
 
 public class HttpClientTestApp {
 
+    public static final String TEST_ID = "testid";
+    public static final String TEST_PASSWORD = "testpw";
+    public static final String TEST_NEW_PASSWORD = "testpw2";
+
     public static String sessionKey = null;
 
     public static void main(String[] args) throws IOException {
@@ -22,6 +26,7 @@ public class HttpClientTestApp {
         TestMethod.postLogin();
         TestMethod.getMembers();
         TestMethod.getMyInfo();
+        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
 
     }
 
@@ -141,12 +146,13 @@ class TestMethod {
 
         // 로그인 정보 JSON 생성
         JSONObject loginJson = new JSONObject();
-        loginJson.put("id", "testid");
-        loginJson.put("password", "testpw");
-        String loginInfo = loginJson.toString();
+        loginJson.put("id", HttpClientTestApp.TEST_ID);
+        loginJson.put("password", HttpClientTestApp.TEST_PASSWORD);
 
-        HttpRequest loginRequest = new HttpRequest("POST", "/login", version, headers, loginInfo);
+        // 요청
+        HttpRequest loginRequest = new HttpRequest("POST", "/login", version, headers, loginJson.toString());
 
+        // 응답
         HttpResponse loginResponse = HttpClientTestApp.sendHttpRequest(loginRequest);
         if (loginResponse.getStatusCode().equals("200")) {
             HttpClientTestApp.sessionKey = loginResponse.getHeaders().get("Session-Key");
@@ -188,6 +194,25 @@ class TestMethod {
         System.out.println(infoResponse.getBody());
 
         System.out.println();
+    }
+
+    public static void postChangeMyPassword(String newPassword) throws IOException {
+        /* POST TEST - 자신의 비밀번호 변경 */
+
+        // body json에서 변경할 비밀번호 parse
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("password", newPassword);
+
+        // 요청
+        HttpRequest changePasswordRequest = new HttpRequest("PATCH", "/changePassword", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse changePasswordResponse = HttpClientTestApp.sendHttpRequest(changePasswordRequest);
+        System.out.println("Response Status : " + changePasswordResponse.getStatusCode());
+        System.out.println(changePasswordResponse.getBody());
+
+        System.out.println();
+
     }
 }
 

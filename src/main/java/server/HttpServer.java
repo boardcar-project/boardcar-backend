@@ -30,6 +30,7 @@ public class HttpServer {
             put("/login", RequestController.login);
             put("/myInfo", RequestController.myInfo);
             put("/members", RequestController.members);
+            put("/changePassword", RequestController.changePassword);
         }
     };
 

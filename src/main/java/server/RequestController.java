@@ -109,6 +109,29 @@ public class RequestController {
         return HttpResponse.ok(headers, stringBuilder.toString());
     };
 
+    public static Function<HttpRequest, HttpResponse> changePassword = request -> {
+
+        // 세션 체크
+        String targetId;
+        if ((targetId = getIdFromSessionContext(request)) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
+        }
+
+        // body json에서 비밀번호 추출
+        JSONObject jsonObject = new JSONObject(request.getBody());
+        String newPassword = jsonObject.getString("password");
+
+        // 비밀번호 변경
+        try {
+            memberDAO.updateMemberPassword(targetId, newPassword);
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
+        }
+
+        return HttpResponse.ok(headers, "Password is changed successfully");
+
+    };
+
 
     public static Function<HttpRequest, HttpResponse> other = request -> {
         return HttpResponse.notFound(headers, "Wrong API access");
