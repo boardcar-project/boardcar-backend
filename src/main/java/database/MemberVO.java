@@ -1,11 +1,10 @@
 package database;
 
-import lombok.ToString;
+import org.json.JSONObject;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-@ToString
 public class MemberVO {
 
     private final String MID;
@@ -18,6 +17,18 @@ public class MemberVO {
         this.PASSWORD = resultSet.getString("PASSWORD");
         this.NAME = resultSet.getString("NAME");
         this.EMAIL = resultSet.getString("EMAIL");
+    }
+
+    @Override
+    public String toString() {
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("MID", MID);
+        jsonObject.put("PASSWORD", PASSWORD);
+        jsonObject.put("NAME", NAME);
+        jsonObject.put("EMAIL", EMAIL);
+
+        return jsonObject.toString();
     }
 
     public String getPassword() {

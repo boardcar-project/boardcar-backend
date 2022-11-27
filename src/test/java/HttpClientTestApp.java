@@ -18,12 +18,12 @@ public class HttpClientTestApp {
 
     public static void main(String[] args) throws IOException {
 
-        TestMethod.getTest_httpTest();
-        TestMethod.postTest_login();
-        TestMethod.getTest_member();
+        TestMethod.gethttpTest();
+        TestMethod.postLogin();
+        TestMethod.getMembers();
+        TestMethod.getMyInfo();
 
     }
-
 
     public static HttpResponse sendHttpRequest(HttpRequest httpRequest) throws IOException {
 
@@ -99,7 +99,7 @@ public class HttpClientTestApp {
             body = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
         }
 
-        return new HttpResponse(version ,statusCode, statusText, headers, body);
+        return new HttpResponse(version, statusCode, statusText, headers, body);
     }
 
     private static String myReadLine(InputStream inputStream) throws IOException {
@@ -121,11 +121,11 @@ public class HttpClientTestApp {
 class TestMethod {
 
     private static String version = "HTTP/1.1";
-    private static Map<String, String> headers = new HashMap<String, String>(){{
+    private static Map<String, String> headers = new HashMap<String, String>() {{
         put("Content-Type", "text/html;charset=utf-8");
     }};
 
-    public static void getTest_httpTest() throws IOException {
+    public static void gethttpTest() throws IOException {
         /* GET TEST */
         HttpRequest testRequest = new HttpRequest("GET", "/httpTest", version, headers, "");
 
@@ -136,7 +136,7 @@ class TestMethod {
         System.out.println();
     }
 
-    public static void postTest_login() throws IOException {
+    public static void postLogin() throws IOException {
         /* POST TEST */
 
         // 로그인 정보 JSON 생성
@@ -158,18 +158,36 @@ class TestMethod {
         System.out.println();
     }
 
-    public static void getTest_member() throws IOException {
+    public static void getMembers() throws IOException {
         /* GET TEST - 멤버 테이블 전체 가져오기 */
 
-        HttpRequest memberListRequest = new HttpRequest("GET", "/member", version, headers, "");
+        HttpRequest memberListRequest = new HttpRequest("GET", "/members", version, headers, "");
         memberListRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
 
         HttpResponse memberListResponse = HttpClientTestApp.sendHttpRequest(memberListRequest);
 
         System.out.println("Response Status : " + memberListResponse.getStatusCode());
-        System.out.println(memberListResponse.getBody());
+
+        String[] memberList = memberListResponse.getBody().split("\n");
+        for(String member : memberList){
+            System.out.println(member);
+        }
         System.out.println();
+
     }
 
+    public static void getMyInfo() throws IOException {
+        /* GET TEST - 자신의 정보 가져오기 */
+
+        HttpRequest infoRequest = new HttpRequest("GET", "/myInfo", version, headers, "");
+        infoRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
+
+        HttpResponse infoResponse = HttpClientTestApp.sendHttpRequest(infoRequest);
+
+        System.out.println("Response Status : " + infoResponse.getStatusCode());
+        System.out.println(infoResponse.getBody());
+
+        System.out.println();
+    }
 }
 

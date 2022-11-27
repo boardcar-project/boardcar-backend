@@ -8,15 +8,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class RequestController {
+
+    private static MemberDAO memberDAO = new MemberDAO();
+
     public static Map<String, String> sessionContext = new HashMap<>();
-    public static Map<String, String> headers = new HashMap<String, String>(){
+    public static Map<String, String> headers = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
         }
@@ -64,28 +64,59 @@ public class RequestController {
         return HttpResponse.ok(headers, "login success");
     };
 
-    public static Function<HttpRequest, HttpResponse> member = request -> {
+    public static Function<HttpRequest, HttpResponse> myInfo = request -> {
 
         // 세션 체크
-        String sessionKey = request.getHeaders().get("Session-Key");
-        if (!sessionContext.containsKey(sessionKey) || sessionKey == null) {
-            return HttpResponse.badRequest(headers,"please login before access DB");
+        String targetId;
+        if ((targetId = getIdFromSessionContext(request)) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
+        }
+
+        // DB에서 Member 레코드 가져와서 JSON 형식으로 body에 저장
+        MemberVO targetMember;
+        String body;
+        try {
+            targetMember = memberDAO.getMemberById(targetId);
+            body = targetMember.toString();
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
+        }
+
+        return HttpResponse.ok(headers, body);
+    };
+
+    public static Function<HttpRequest, HttpResponse> members = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
         }
 
         // DB에서 member 정보 가져오기
-        MemberDAO memberDAO = new MemberDAO();
-        List<MemberVO> memberVOList = memberDAO.getMemberVOList();
-
-        // member 정보를 가진 body 만들기
-        StringBuilder bodyBuilder = new StringBuilder();
-        for (MemberVO memberVO : memberVOList) {
-            bodyBuilder.append(memberVO.toString()).append("\n");
+        List<MemberVO> memberVOList = null;
+        try {
+            memberVOList = memberDAO.getMemberVOList();
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
         }
 
-        return HttpResponse.ok(headers, bodyBuilder.toString());
+        // member 정보를 가진 JSON body 만들기
+        StringBuilder stringBuilder = new StringBuilder();
+        for(MemberVO memberVO : memberVOList){
+            stringBuilder.append(memberVO.toString()).append("\n");
+        }
+
+        return HttpResponse.ok(headers, stringBuilder.toString());
     };
+
 
     public static Function<HttpRequest, HttpResponse> other = request -> {
         return HttpResponse.notFound(headers, "Wrong API access");
     };
+
+    public static String getIdFromSessionContext(HttpRequest request) {
+        String sessionKey = request.getHeaders().getOrDefault("Session-Key", null);
+
+        return sessionContext.getOrDefault(sessionKey, null);
+    }
 }
