@@ -16,7 +16,7 @@ public class RequestController {
     public static Map<String, String> sessionContext = new HashMap<>();
 
 
-    public static Function<HttpRequest, HttpResponse> httpTest = request ->{
+    public static Function<HttpRequest, HttpResponse> httpTest = request -> {
 
         return HttpResponse.builder()
                 .statusCode("200")
@@ -35,7 +35,11 @@ public class RequestController {
         } catch (JSONException e) {
             // body가 잘못 되었을 때
             e.printStackTrace();
-            throw new RuntimeException(e);
+            return HttpResponse.builder()
+                    .statusCode("400")
+                    .statusText("Bad Request")
+                    .body("invalid body")
+                    .build();
         }
 
         // DB에서 회원 ID 찾기
@@ -80,7 +84,7 @@ public class RequestController {
 
         // 세션 체크
         String sessionKey = request.headers.get("Session-Key");
-        if(!sessionContext.containsKey(sessionKey) || sessionKey == null){
+        if (!sessionContext.containsKey(sessionKey) || sessionKey == null) {
             return HttpResponse.builder()
                     .statusCode("400")
                     .statusText("Bad Request")

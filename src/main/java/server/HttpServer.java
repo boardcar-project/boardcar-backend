@@ -168,6 +168,7 @@ public class HttpServer {
         return dispatcherTable.getOrDefault(httpRequest.path, RequestController.other).apply(httpRequest);
     }
 }
+
 @Builder
 class HttpRequest {
     String method;
@@ -186,7 +187,7 @@ class HttpResponse {
     String statusCode;
     String statusText;
     @Builder.Default
-    Map<String, String> headers = new HashMap<String, String>(){
+    Map<String, String> headers = new HashMap<String, String>() {
         {
             put("Content-Type", "text/html;charset=utf-8");
         }
@@ -206,8 +207,8 @@ class HttpResponse {
         stringBuilder.append(version).append(" ").append(statusCode).append(" ").append(statusText).append(System.lineSeparator());
 
         // headers
-        if(body != null){
-            headers.put("Content-Length", String.valueOf(body.length()));
+        if (body != null) {
+            headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         }
         headers.forEach((header, value) -> {
             stringBuilder.append(header).append(": ").append(value).append(System.lineSeparator());

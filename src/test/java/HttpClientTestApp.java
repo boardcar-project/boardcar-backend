@@ -54,6 +54,7 @@ public class HttpClientTestApp {
             return httpResponse;
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
