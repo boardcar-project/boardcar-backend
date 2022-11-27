@@ -1,9 +1,11 @@
 import lombok.Builder;
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,7 @@ public class HttpClientTestApp {
 
     public static String sessionKey = null;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         TestMethod.getTest_httpTest();
         TestMethod.postTest_login();
@@ -22,20 +24,14 @@ public class HttpClientTestApp {
     }
 
 
-    public static HttpResponse sendHttpRequest(HttpRequest httpRequest) {
+    public static HttpResponse sendHttpRequest(HttpRequest httpRequest) throws IOException {
 
         // 서버 정보 가져오기
-        String SERVER_IP;
-        final int SERVER_PORT;
         Properties properties = new Properties();
-        try {
-            properties.load(new FileInputStream(".properties"));
-//            SERVER_IP = properties.getProperty("SERVER_IP");
-            SERVER_IP = "localhost";
-            SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        properties.load(new FileInputStream(".properties"));
+//        String SERVER_IP = properties.getProperty("SERVER_IP");
+        String SERVER_IP = "localhost";
+        final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // HTTP 통신
         try {
@@ -95,12 +91,11 @@ public class HttpClientTestApp {
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         if (contentLength > 0) {
 
-            ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             for (int i = 0; i < contentLength; i++) {
-                int b = inputStream.read();
-                tmp.write(b);
+                byteArrayOutputStream.write(inputStream.read());
             }
-            body = new String(tmp.toByteArray(), StandardCharsets.UTF_8);
+            body = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
         }
 
         return HttpResponse.builder()
@@ -181,8 +176,8 @@ class HttpResponse {
     String body;
 }
 
-class TestMethod{
-    public static void getTest_httpTest() {
+class TestMethod {
+    public static void getTest_httpTest() throws IOException {
         /* GET TEST */
         HttpRequest testRequest = HttpRequest.builder()
                 .method("GET")
@@ -196,7 +191,7 @@ class TestMethod{
         System.out.println();
     }
 
-    public static void postTest_login() {
+    public static void postTest_login() throws IOException {
         /* POST TEST */
 
         // 로그인 정보 JSON 생성
@@ -223,7 +218,7 @@ class TestMethod{
         System.out.println();
     }
 
-    public static void getTest_member() {
+    public static void getTest_member() throws IOException {
         /* GET TEST - 멤버 테이블 전체 가져오기 */
 
         HttpRequest memberListRequest = HttpRequest.builder()

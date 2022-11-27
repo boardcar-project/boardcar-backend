@@ -15,7 +15,6 @@ import java.util.function.Function;
 public class RequestController {
     public static Map<String, String> sessionContext = new HashMap<>();
 
-
     public static Function<HttpRequest, HttpResponse> httpTest = request -> {
 
         return HttpResponse.builder()
@@ -66,15 +65,15 @@ public class RequestController {
         }
 
         // 로그인 성공! -> 세션 생성
+        UUID uuid = UUID.randomUUID();
+        sessionContext.put(uuid.toString(), id);
+
+        // Response 생성
         HttpResponse httpResponse = HttpResponse.builder()
                 .statusCode("200")
                 .statusText("OK")
                 .body("login success")
                 .build();
-        UUID uuid = UUID.randomUUID();
-        sessionContext.put(uuid.toString(), id);
-
-        // Response header에 세션 키 추가
         httpResponse.setHeaders("Session-Key", uuid.toString());
 
         return httpResponse;
@@ -109,8 +108,6 @@ public class RequestController {
                 .build();
     };
 
-
-    // 등록되지 않은 PATH
     public static Function<HttpRequest, HttpResponse> other = request -> {
         return HttpResponse.builder()
                 .statusCode("404")
