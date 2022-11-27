@@ -1,19 +1,18 @@
 package http;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
 
     /* << HttpRequest Example >>
-    * POST /path HTTP/1.1
-    * Content-Type: text/html;charset=utf-8
-    * Host: boardcar
-    * Content-Length: 12
-    *
-    * Hello World!
-    * */
+     * POST /path HTTP/1.1
+     * Content-Type: text/html;charset=utf-8
+     * Host: boardcar
+     * Content-Length: 12
+     *
+     * Hello World!
+     * */
 
     /* start-line */
     String method;
@@ -37,8 +36,9 @@ public class HttpRequest {
         putHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
 
     }
-    public void putHeader(String header, String value){
-        headers.put(header,value);
+
+    public void putHeader(String header, String value) {
+        headers.put(header, value);
     }
 
     @Override

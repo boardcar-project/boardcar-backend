@@ -33,26 +33,26 @@ public class HttpResponse {
         this.headers = headers;
         this.body = body;
 
-        if(!body.equals("")){
+        if (!body.equals("")) {
             this.putHeader("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
         }
     }
 
     /* Static factory */
-    public static HttpResponse ok(Map<String,String> headers, String body){
+    public static HttpResponse ok(Map<String, String> headers, String body) {
         return new HttpResponse("HTTP/1.1", "200", "OK", headers, body);
     }
 
-    public static HttpResponse badRequest(Map<String,String> headers, String body){
+    public static HttpResponse badRequest(Map<String, String> headers, String body) {
         return new HttpResponse("HTTP/1.1", "400", "Bad Request", headers, body);
     }
 
-    public static HttpResponse notFound(Map<String,String> headers, String body){
+    public static HttpResponse notFound(Map<String, String> headers, String body) {
         return new HttpResponse("HTTP/1.1", "404", "Not Found", headers, body);
     }
 
-    public void putHeader(String header, String value){
-        headers.put(header,value);
+    public void putHeader(String header, String value) {
+        headers.put(header, value);
     }
 
 
