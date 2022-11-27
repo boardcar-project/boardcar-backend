@@ -1,6 +1,6 @@
 # directory
 .idea/
-out/
+target/
 src/META-INF
 
 # file
