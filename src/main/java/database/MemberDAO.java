@@ -37,23 +37,18 @@ public class MemberDAO {
 
     }
 
-    public List<MemberVO> getMemberVOList() {
+    public List<MemberVO> getMemberVOList() throws SQLException {
 
         List<MemberVO> memberVOList = new LinkedList<>();
 
-        try {
-            PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
+        PreparedStatement sqlQuery = this.connection.prepareStatement("select * from member");
 
-            ResultSet resultSet = sqlQuery.executeQuery();
-            while (resultSet.next()) {
-                memberVOList.add(new MemberVO(resultSet));
-            }
-
-            return memberVOList;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        ResultSet resultSet = sqlQuery.executeQuery();
+        while (resultSet.next()) {
+            memberVOList.add(new MemberVO(resultSet));
         }
+
+        return memberVOList;
 
     }
 }
