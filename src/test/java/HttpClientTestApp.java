@@ -24,7 +24,7 @@ public class HttpClientTestApp {
 //        TestMethod.GET_httpTest();
 
         /* LOGIN TEST API */
-        TestMethod.POST_postLogin();
+        TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
 
         /* MEMBER TABLE TEST API */
 //        TestMethod.GET_Members();
@@ -34,10 +34,10 @@ public class HttpClientTestApp {
         /* POST TABLE TEST API*/
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
 //        TestMethod.GET_openPostList();
-        TestMethod.DELETE_deletePost(23);
-
+//        TestMethod.DELETE_deletePost(24);
+//
 //        TestMethod.GET_openPostByPid(1);
-//        TestMethod.POST_updatePost(1, "바디 변경 테스트");
+//        TestMethod.POST_updatePost(11, "바디 변경 테스트");
 
 
     }
