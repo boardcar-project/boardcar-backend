@@ -26,7 +26,8 @@ public class HttpClientTestApp {
         TestMethod.postLogin();
         TestMethod.getMembers();
         TestMethod.getMyInfo();
-        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
+//        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
+        TestMethod.putUploadPost();
 
     }
 
@@ -199,7 +200,7 @@ class TestMethod {
     public static void postChangeMyPassword(String newPassword) throws IOException {
         /* POST TEST - 자신의 비밀번호 변경 */
 
-        // body json에서 변경할 비밀번호 parse
+        // body JSON에서 변경할 비밀번호 parse
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("password", newPassword);
 
@@ -210,6 +211,26 @@ class TestMethod {
         HttpResponse changePasswordResponse = HttpClientTestApp.sendHttpRequest(changePasswordRequest);
         System.out.println("Response Status : " + changePasswordResponse.getStatusCode());
         System.out.println(changePasswordResponse.getBody());
+
+        System.out.println();
+
+    }
+
+    public static void putUploadPost() throws IOException {
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("MID", "testid");
+        jsonObject.put("PDATE", "2022-11-11");
+        jsonObject.put("TITLE", "테스트 제목");
+        jsonObject.put("BODY", "테스트 바디");
+        jsonObject.put("TYPE", "자유");
+
+        HttpRequest uploadPostRequest = new HttpRequest("PUT", "/uploadPost", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse uploadPostResponse = HttpClientTestApp.sendHttpRequest(uploadPostRequest);
+        System.out.println("Response Status : " + uploadPostResponse.getStatusCode());
+        System.out.println(uploadPostResponse.getBody());
 
         System.out.println();
 

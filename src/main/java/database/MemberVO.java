@@ -19,8 +19,7 @@ public class MemberVO {
         this.EMAIL = resultSet.getString("EMAIL");
     }
 
-    @Override
-    public String toString() {
+    public String toJSON() {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("MID", MID);

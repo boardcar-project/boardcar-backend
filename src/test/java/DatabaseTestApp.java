@@ -7,7 +7,7 @@ public class DatabaseTestApp {
 
     public static void main(String[] args) throws SQLException {
         MemberDAO memberDAO = new MemberDAO();
-        for (MemberVO mvo : memberDAO.getMemberVOList()) {
+        for (MemberVO mvo : memberDAO.SELECT_memberList()) {
             System.out.println(mvo);
         }
 

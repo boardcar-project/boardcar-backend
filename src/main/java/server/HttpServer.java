@@ -12,6 +12,9 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,6 +27,8 @@ public class HttpServer {
 
     private static final Logger logger = Logger.getLogger("Server Logger");
 
+    private static Connection databaseConnection = null;
+
     private static final Map<String, Function<HttpRequest, HttpResponse>> dispatcherTable = new HashMap<String, Function<HttpRequest, HttpResponse>>() {
         {
             put("/httpTest", RequestController.httpTest);
@@ -31,14 +36,18 @@ public class HttpServer {
             put("/myInfo", RequestController.myInfo);
             put("/members", RequestController.members);
             put("/changePassword", RequestController.changePassword);
+            put("/uploadPost", RequestController.uploadPost);
         }
     };
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
         // PORT 번호 읽기
         Properties properties = new Properties();
         properties.load(Files.newInputStream(Paths.get(".properties")));
         final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
+
+        // DB 서버 연결
+        databaseConnection = DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_ID"), properties.getProperty("DB_PW"));
 
         // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
@@ -151,6 +160,10 @@ public class HttpServer {
     private static HttpResponse requestDispatcher(HttpRequest httpRequest) {
 
         return dispatcherTable.getOrDefault(httpRequest.getPath(), RequestController.other).apply(httpRequest);
+    }
+
+    public static Connection getDatabaseConnection() {
+        return databaseConnection;
     }
 }
 
