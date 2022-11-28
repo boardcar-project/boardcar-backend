@@ -33,10 +33,10 @@ public class HttpClientTestApp {
 
         /* POST TABLE TEST API*/
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
-//        TestMethod.GET_openPostList();
-//        TestMethod.DELETE_deletePost(24);
-//
-//        TestMethod.GET_openPostByPid(1);
+//        TestMethod.GET_openPostList("자유");
+//        TestMethod.DELETE_deletePost(25);
+
+//        TestMethod.GET_openPostByPid(11);
 //        TestMethod.POST_updatePost(11, "바디 변경 테스트");
 
 
@@ -249,11 +249,11 @@ class TestMethod {
 
     }
 
-    public static void GET_openPostList() throws IOException {
+    public static void GET_openPostList(String TYPE) throws IOException {
 
         // JSON 생성
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("TYPE", "자유");
+        jsonObject.put("TYPE", TYPE);
 
         // 요청
         HttpRequest openPostListRequest = new HttpRequest("GET", "/openPostList", version, headers, jsonObject.toString());
