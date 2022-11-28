@@ -3,6 +3,7 @@ package server;
 import database.MemberDAO;
 import database.MemberVO;
 import database.PostDAO;
+import database.PostVO;
 import http.HttpRequest;
 import http.HttpResponse;
 import org.json.JSONException;
@@ -41,7 +42,7 @@ public class RequestController {
 
         // DB에서 회원 ID 찾기
         try {
-            MemberVO requestMember = memberDAO.SELECT_memberById(id);
+            MemberVO requestMember = memberDAO.SELECT_memberByMid(id);
 
             // PW가 틀린 경우
             if (!requestMember.getPassword().equals(password)) {
@@ -74,10 +75,9 @@ public class RequestController {
         // DB에서 Member 레코드 가져와서 JSON 형식으로 body에 저장
         try {
             // SQL 실행
-            MemberVO targetMember = memberDAO.SELECT_memberById(targetId);
-            String body = targetMember.toJSON();
+            MemberVO targetMember = memberDAO.SELECT_memberByMid(targetId);
 
-            return HttpResponse.ok(headers, body);
+            return HttpResponse.ok(headers, targetMember.toJSON());
 
         } catch (SQLException e) {
             return HttpResponse.badRequest(headers, e.toString());
@@ -131,14 +131,13 @@ public class RequestController {
     public static Function<HttpRequest, HttpResponse> uploadPost = request -> {
 
         // 세션 체크
-        String targetId;
-        if ((targetId = getIdFromSessionContext(request)) == null) {
+        if (getIdFromSessionContext(request) == null) {
             return HttpResponse.badRequest(headers, "please login before access DB");
         }
 
         // 게시글 업로드
         try {
-            int sqlResult = postDAO.INSERT_uploadPost(new JSONObject(request.getBody()));
+            int sqlResult = postDAO.INSERT_post(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(headers, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
 
@@ -146,6 +145,49 @@ public class RequestController {
             return HttpResponse.badRequest(headers, e.toString());
         }
 
+    };
+
+    public static Function<HttpRequest, HttpResponse> openPostList = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
+        }
+
+        // DB에서 게시글 리스트 가져오기
+        try {
+            // SQL 실행
+            List<PostVO> postVOList  = postDAO.SELECT_postList(new JSONObject(request.getBody()));
+
+            // member 정보를 가진 JSON body 만들기 -> split 구분자 \n
+            StringBuilder stringBuilder = new StringBuilder();
+            for(PostVO postVO : postVOList){
+                stringBuilder.append(postVO.toJSON()).append("\n");
+            }
+
+            return HttpResponse.ok(headers, stringBuilder.toString());
+
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
+        }
+    };
+
+    public static Function<HttpRequest, HttpResponse> openPost = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
+        }
+
+        // DB에서 PID로 게시글 가져오기
+        try {
+            PostVO postVO = postDAO.SELECT_postByPid(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(headers, postVO.toJSON());
+
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
+        }
     };
 
 

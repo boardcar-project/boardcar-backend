@@ -18,16 +18,24 @@ public class HttpClientTestApp {
     public static final String TEST_PASSWORD = "testpw";
     public static final String TEST_NEW_PASSWORD = "testpw2";
 
-    public static String sessionKey = null;
-
     public static void main(String[] args) throws IOException {
 
-        TestMethod.gethttpTest();
-        TestMethod.postLogin();
-        TestMethod.getMembers();
-        TestMethod.getMyInfo();
+        /* HTTP TEST API */
+//        TestMethod.gethttpTest();
+
+        /* LOGIN TEST API */
+        TestMethod.POST_postLogin();
+
+        /* MEMBER TABLE TEST API */
+//        TestMethod.getMembers();
+//        TestMethod.getMyInfo();
 //        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
-        TestMethod.putUploadPost();
+
+        /* POST TABLE TEST API*/
+//        TestMethod.PUT_uploadPost();
+        TestMethod.GET_openPostList();
+        TestMethod.GET_openPostByPid(1);
+
 
     }
 
@@ -131,18 +139,22 @@ class TestMethod {
         put("Content-Type", "text/html;charset=utf-8");
     }};
 
-    public static void gethttpTest() throws IOException {
+    public static void GET_httpTest() throws IOException {
         /* GET TEST */
+
+        // 요청
         HttpRequest testRequest = new HttpRequest("GET", "/httpTest", version, headers, "");
 
-
+        // 응답
         HttpResponse testResponse = HttpClientTestApp.sendHttpRequest(testRequest);
-        System.out.println("Response Status : " + testResponse.getStatusCode());
-        System.out.println(testResponse.getBody());
-        System.out.println();
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(testResponse);
+
     }
 
-    public static void postLogin() throws IOException {
+    public static void POST_postLogin() throws IOException {
         /* POST TEST */
 
         // 로그인 정보 JSON 생성
@@ -156,51 +168,47 @@ class TestMethod {
         // 응답
         HttpResponse loginResponse = HttpClientTestApp.sendHttpRequest(loginRequest);
         if (loginResponse.getStatusCode().equals("200")) {
-            HttpClientTestApp.sessionKey = loginResponse.getHeaders().get("Session-Key");
+            headers.put("Session-Key", loginResponse.getHeaders().get("Session-Key"));
         }
 
-        System.out.println("Response Status : " + loginResponse.getStatusCode());
-        System.out.println(loginResponse.getBody());
-        System.out.println("Session-Key is " + HttpClientTestApp.sessionKey);
-        System.out.println();
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(loginResponse);
+
     }
 
-    public static void getMembers() throws IOException {
+    public static void GET_Members() throws IOException {
         /* GET TEST - 멤버 테이블 전체 가져오기 */
 
+        // 요청
         HttpRequest memberListRequest = new HttpRequest("GET", "/members", version, headers, "");
-        memberListRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
 
+        // 응답
         HttpResponse memberListResponse = HttpClientTestApp.sendHttpRequest(memberListRequest);
 
-        System.out.println("Response Status : " + memberListResponse.getStatusCode());
-
-        String[] memberList = memberListResponse.getBody().split("\n");
-        for(String member : memberList){
-            System.out.println(member);
-        }
-        System.out.println();
-
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(memberListResponse);
     }
 
-    public static void getMyInfo() throws IOException {
+    public static void GET_myInfo() throws IOException {
         /* GET TEST - 자신의 정보 가져오기 */
 
+        // 요청
         HttpRequest infoRequest = new HttpRequest("GET", "/myInfo", version, headers, "");
-        infoRequest.putHeader("Session-Key", HttpClientTestApp.sessionKey);
 
+        // 응답
         HttpResponse infoResponse = HttpClientTestApp.sendHttpRequest(infoRequest);
 
-        System.out.println("Response Status : " + infoResponse.getStatusCode());
-        System.out.println(infoResponse.getBody());
-
-        System.out.println();
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(infoResponse);
     }
 
-    public static void postChangeMyPassword(String newPassword) throws IOException {
+    public static void POST_changePassword(String newPassword) throws IOException {
         /* POST TEST - 자신의 비밀번호 변경 */
 
-        // body JSON에서 변경할 비밀번호 parse
+        // JSON 생성
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("password", newPassword);
 
@@ -209,15 +217,16 @@ class TestMethod {
 
         // 응답
         HttpResponse changePasswordResponse = HttpClientTestApp.sendHttpRequest(changePasswordRequest);
-        System.out.println("Response Status : " + changePasswordResponse.getStatusCode());
-        System.out.println(changePasswordResponse.getBody());
 
-        System.out.println();
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(changePasswordResponse);
 
     }
 
-    public static void putUploadPost() throws IOException {
+    public static void PUT_uploadPost() throws IOException {
 
+        // JSON 생성
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("MID", "testid");
         jsonObject.put("PDATE", "2022-11-11");
@@ -225,15 +234,50 @@ class TestMethod {
         jsonObject.put("BODY", "테스트 바디");
         jsonObject.put("TYPE", "자유");
 
+        // 요청
         HttpRequest uploadPostRequest = new HttpRequest("PUT", "/uploadPost", version, headers, jsonObject.toString());
 
         // 응답
         HttpResponse uploadPostResponse = HttpClientTestApp.sendHttpRequest(uploadPostRequest);
-        System.out.println("Response Status : " + uploadPostResponse.getStatusCode());
-        System.out.println(uploadPostResponse.getBody());
 
-        System.out.println();
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(uploadPostResponse);
 
+    }
+
+    public static void GET_openPostList() throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("TYPE", "자유");
+
+        // 요청
+        HttpRequest openPostListRequest = new HttpRequest("GET", "/openPostList", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse openPostListResponse = HttpClientTestApp.sendHttpRequest(openPostListRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(openPostListResponse);
+    }
+
+    public static void GET_openPostByPid(int PID) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("PID", PID);
+
+        // 요청
+        HttpRequest openPostByPidRequest = new HttpRequest("GET", "/openPost", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse openPostByPidResponse = HttpClientTestApp.sendHttpRequest(openPostByPidRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(openPostByPidResponse);
     }
 }
 

@@ -27,8 +27,7 @@ public class PostVO {
         this.PDATE = resultSet.getString("PDATE");
     }
 
-    @Override
-    public String toString() {
+    public String toJSON() {
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("PID", PID);

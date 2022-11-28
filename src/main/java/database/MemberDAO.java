@@ -11,23 +11,12 @@ import java.util.List;
 
 public class MemberDAO {
 
-    public MemberVO SELECT_memberById(String MID) throws SQLException {
-
-        PreparedStatement sqlQuery;
-
-        sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER WHERE MID = ?");
-        sqlQuery.setString(1, MID);
-
-        ResultSet resultSet = sqlQuery.executeQuery();
-        resultSet.next();
-
-        return new MemberVO(resultSet);
-    }
-
     public List<MemberVO> SELECT_memberList() throws SQLException {
 
+        // 멤버 리스트 생성
         List<MemberVO> memberVOList = new LinkedList<>();
 
+        // SQL query 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER");
 
         ResultSet resultSet = sqlQuery.executeQuery();
@@ -35,12 +24,25 @@ public class MemberDAO {
             memberVOList.add(new MemberVO(resultSet));
         }
 
-        return memberVOList;
+        return memberVOList; // 멤버 리스트 반환
+    }
+
+    public MemberVO SELECT_memberByMid(String MID) throws SQLException {
+
+        // SQL query 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER WHERE MID = ?");
+        sqlQuery.setString(1, MID);
+
+        // SQL query 실행
+        ResultSet resultSet = sqlQuery.executeQuery();
+        resultSet.next();
+
+        return new MemberVO(resultSet); // 멤버 반환
     }
 
     public int UPDATE_memberPassword(String MID, JSONObject jsonObject) throws SQLException {
 
-        // body JSON에서 비밀번호 추출
+        // JSON parse
         String newPassword = jsonObject.getString("password");
 
         // SQL 생성
@@ -48,6 +50,7 @@ public class MemberDAO {
         sqlQuery.setString(1, newPassword);
         sqlQuery.setString(2, MID);
 
-        return sqlQuery.executeUpdate();
+        // SQL query 실행
+        return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
     }
 }

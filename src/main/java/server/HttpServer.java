@@ -37,6 +37,8 @@ public class HttpServer {
             put("/members", RequestController.members);
             put("/changePassword", RequestController.changePassword);
             put("/uploadPost", RequestController.uploadPost);
+            put("/openPostList", RequestController.openPostList);
+            put("/openPost", RequestController.openPost);
         }
     };
 
