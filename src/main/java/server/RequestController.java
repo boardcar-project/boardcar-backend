@@ -6,6 +6,7 @@ import database.PostDAO;
 import database.PostVO;
 import http.HttpRequest;
 import http.HttpResponse;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -97,13 +98,13 @@ public class RequestController {
             // SQL 실행
             List<MemberVO> memberVOList  = memberDAO.SELECT_memberList();
 
-            // member 정보를 가진 JSON body 만들기 -> split 구분자 \n
-            StringBuilder stringBuilder = new StringBuilder();
+            // MemberVO를 JSONObject로 만들어 JSONArray에 저장
+            JSONArray jsonArray = new JSONArray();
             for(MemberVO memberVO : memberVOList){
-                stringBuilder.append(memberVO.toJSON()).append("\n");
+                jsonArray.put(memberVO.toJSON());
             }
 
-            return HttpResponse.ok(headers, stringBuilder.toString());
+            return HttpResponse.ok(headers, jsonArray.toString());
 
         } catch (SQLException e) {
             return HttpResponse.badRequest(headers, e.toString());
@@ -159,13 +160,13 @@ public class RequestController {
             // SQL 실행
             List<PostVO> postVOList  = postDAO.SELECT_postList(new JSONObject(request.getBody()));
 
-            // member 정보를 가진 JSON body 만들기 -> split 구분자 \n
-            StringBuilder stringBuilder = new StringBuilder();
+            // PostVO를 JSONObject로 만들어 JSONArray에 저장
+            JSONArray jsonArray = new JSONArray();
             for(PostVO postVO : postVOList){
-                stringBuilder.append(postVO.toJSON()).append("\n");
+                jsonArray.put(postVO.toJSON());
             }
 
-            return HttpResponse.ok(headers, stringBuilder.toString());
+            return HttpResponse.ok(headers, jsonArray.toString());
 
         } catch (SQLException e) {
             return HttpResponse.badRequest(headers, e.toString());
