@@ -21,20 +21,21 @@ public class HttpClientTestApp {
     public static void main(String[] args) throws IOException {
 
         /* HTTP TEST API */
-//        TestMethod.gethttpTest();
+//        TestMethod.GET_httpTest();
 
         /* LOGIN TEST API */
         TestMethod.POST_postLogin();
 
         /* MEMBER TABLE TEST API */
-//        TestMethod.getMembers();
-//        TestMethod.getMyInfo();
-//        TestMethod.postChangeMyPassword(TEST_NEW_PASSWORD);
+//        TestMethod.GET_Members();
+//        TestMethod.GET_myInfo();
+//        TestMethod.POST_changePassword(TEST_NEW_PASSWORD);
 
         /* POST TABLE TEST API*/
 //        TestMethod.PUT_uploadPost();
-        TestMethod.GET_openPostList();
+//        TestMethod.GET_openPostList();
         TestMethod.GET_openPostByPid(1);
+        TestMethod.POST_updatePost(1, "바디 변경 테스트");
 
 
     }
@@ -278,6 +279,24 @@ class TestMethod {
         // 결과 출력
         System.out.println("--------------------------------");
         System.out.println(openPostByPidResponse);
+    }
+
+    public static void POST_updatePost(int PID, String BODY) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("PID", PID);
+        jsonObject.put("BODY", BODY);
+
+        // 요청
+        HttpRequest updatePostRequest = new HttpRequest("POST", "/updatePost", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse updatePostResponse= HttpClientTestApp.sendHttpRequest(updatePostRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(updatePostResponse);
     }
 }
 

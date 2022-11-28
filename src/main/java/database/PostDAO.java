@@ -11,6 +11,10 @@ import java.util.List;
 
 public class PostDAO {
 
+    /*
+    * JSONObject로 받아서 메서드 내에서 parse하는게 맞나.. 외부에서 parse하고 넣는게 맞는거 같은데 왜 JSONException 컴파일 에러가 안뜨지
+    * */
+
     public int INSERT_post(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
@@ -22,7 +26,6 @@ public class PostDAO {
 
         // SQL query 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("INSERT INTO POST (PID, MID, PDATE, TITLE, BODY, TYPE) VALUES (PCOUNTER.nextval, ?,to_date(?, 'YYYY-MM-DD'),?,?,?)");
-
         sqlQuery.setString(1, MID);
         sqlQuery.setString(2, PDATE);
         sqlQuery.setString(3, TITLE);
@@ -70,5 +73,19 @@ public class PostDAO {
         return new PostVO(resultSet); // 게시글 반환
     }
 
+    public int UPDATE_updatePost(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        int PID = jsonObject.getInt("PID");
+        String BODY = jsonObject.getString("BODY");
+
+        // SQL query 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("UPDATE POST SET BODY=? WHERE PID=?");
+        sqlQuery.setString(1, BODY);
+        sqlQuery.setInt(2,PID);
+
+        // SQL query 실행
+        return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
+    }
 
 }

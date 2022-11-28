@@ -39,6 +39,7 @@ public class HttpServer {
             put("/uploadPost", RequestController.uploadPost);
             put("/openPostList", RequestController.openPostList);
             put("/openPost", RequestController.openPost);
+            put("/updatePost", RequestController.updatePost);
         }
     };
 
