@@ -73,7 +73,7 @@ public class PostDAO {
         return new PostVO(resultSet); // 게시글 반환
     }
 
-    public int UPDATE_updatePost(JSONObject jsonObject) throws SQLException {
+    public int UPDATE_post(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
         int PID = jsonObject.getInt("PID");
@@ -83,6 +83,19 @@ public class PostDAO {
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("UPDATE POST SET BODY=? WHERE PID=?");
         sqlQuery.setString(1, BODY);
         sqlQuery.setInt(2,PID);
+
+        // SQL query 실행
+        return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
+    }
+
+    public int DELETE_post(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        int PID = jsonObject.getInt("PID");
+
+        // SQL query 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("DELETE FROM POST WHERE PID=?");
+        sqlQuery.setInt(1,PID);
 
         // SQL query 실행
         return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
