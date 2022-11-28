@@ -47,7 +47,7 @@ public class PostDAO {
 
         // SQL query 실행
         ResultSet resultSet = sqlQuery.executeQuery();
-        while (resultSet.next()){
+        while (resultSet.next()) {
             postVOList.add(new PostVO(resultSet));
         }
 
@@ -69,7 +69,6 @@ public class PostDAO {
 
         return new PostVO(resultSet); // 게시글 반환
     }
-
 
 
 }

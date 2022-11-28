@@ -11,7 +11,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class RequestController {
@@ -96,11 +99,11 @@ public class RequestController {
         // DB에서 member 정보 가져오기
         try {
             // SQL 실행
-            List<MemberVO> memberVOList  = memberDAO.SELECT_memberList();
+            List<MemberVO> memberVOList = memberDAO.SELECT_memberList();
 
             // MemberVO를 JSONObject로 만들어 JSONArray에 저장
             JSONArray jsonArray = new JSONArray();
-            for(MemberVO memberVO : memberVOList){
+            for (MemberVO memberVO : memberVOList) {
                 jsonArray.put(memberVO.toJSON());
             }
 
@@ -158,11 +161,11 @@ public class RequestController {
         // DB에서 게시글 리스트 가져오기
         try {
             // SQL 실행
-            List<PostVO> postVOList  = postDAO.SELECT_postList(new JSONObject(request.getBody()));
+            List<PostVO> postVOList = postDAO.SELECT_postList(new JSONObject(request.getBody()));
 
             // PostVO를 JSONObject로 만들어 JSONArray에 저장
             JSONArray jsonArray = new JSONArray();
-            for(PostVO postVO : postVOList){
+            for (PostVO postVO : postVOList) {
                 jsonArray.put(postVO.toJSON());
             }
 
