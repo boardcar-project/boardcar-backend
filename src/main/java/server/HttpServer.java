@@ -40,6 +40,7 @@ public class HttpServer {
             put("/openPostList", RequestController.openPostList);
             put("/openPost", RequestController.openPost);
             put("/updatePost", RequestController.updatePost);
+            put("/deletePost", RequestController.deletePost);
         }
     };
 

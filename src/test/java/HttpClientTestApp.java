@@ -32,10 +32,12 @@ public class HttpClientTestApp {
 //        TestMethod.POST_changePassword(TEST_NEW_PASSWORD);
 
         /* POST TABLE TEST API*/
-//        TestMethod.PUT_uploadPost();
+//        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
 //        TestMethod.GET_openPostList();
-        TestMethod.GET_openPostByPid(1);
-        TestMethod.POST_updatePost(1, "바디 변경 테스트");
+        TestMethod.DELETE_deletePost(23);
+
+//        TestMethod.GET_openPostByPid(1);
+//        TestMethod.POST_updatePost(1, "바디 변경 테스트");
 
 
     }
@@ -225,15 +227,15 @@ class TestMethod {
 
     }
 
-    public static void PUT_uploadPost() throws IOException {
+    public static void PUT_uploadPost(String MID, String PDATE, String TITLE, String BODY, String TYPE) throws IOException {
 
         // JSON 생성
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("MID", "testid");
-        jsonObject.put("PDATE", "2022-11-11");
-        jsonObject.put("TITLE", "테스트 제목");
-        jsonObject.put("BODY", "테스트 바디");
-        jsonObject.put("TYPE", "자유");
+        jsonObject.put("MID", MID);
+        jsonObject.put("PDATE", PDATE);
+        jsonObject.put("TITLE", TITLE);
+        jsonObject.put("BODY", BODY);
+        jsonObject.put("TYPE", TYPE);
 
         // 요청
         HttpRequest uploadPostRequest = new HttpRequest("PUT", "/uploadPost", version, headers, jsonObject.toString());
@@ -297,6 +299,23 @@ class TestMethod {
         // 결과 출력
         System.out.println("--------------------------------");
         System.out.println(updatePostResponse);
+    }
+
+    public static void DELETE_deletePost(int PID) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("PID", PID);
+
+        // 요청
+        HttpRequest deletePostRequest = new HttpRequest("POST", "/deletePost", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse deletePostResponse= HttpClientTestApp.sendHttpRequest(deletePostRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(deletePostResponse);
     }
 }
 

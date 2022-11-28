@@ -203,9 +203,27 @@ public class RequestController {
 
         // 게시글 내용 변경
         try {
-            int sqlResult = postDAO.UPDATE_updatePost(new JSONObject(request.getBody()));
+            int sqlResult = postDAO.UPDATE_post(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(headers, "Post body is changed successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(headers, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> deletePost = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(headers, "please login before access DB");
+        }
+
+        // 게시글 삭제
+        try {
+            int sqlResult = postDAO.DELETE_post(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(headers, "Post is deleted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
             return HttpResponse.badRequest(headers, e.toString());
         }
