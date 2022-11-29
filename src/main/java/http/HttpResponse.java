@@ -1,6 +1,7 @@
 package http;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -30,7 +31,7 @@ public class HttpResponse {
         this.version = version;
         this.statusCode = statusCode;
         this.statusText = statusText;
-        this.headers = headers;
+        this.headers = new HashMap<>(headers); // new가 아닌 headers로 가져오면 put을 할 때 serverDefaultHeaders에 put을 하게 된다.
         this.body = body;
 
         if (!body.equals("")) {

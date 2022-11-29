@@ -21,10 +21,11 @@ public class HttpClientTestApp {
     public static void main(String[] args) throws IOException {
 
         /* HTTP TEST API */
-//        TestMethod.GET_httpTest();
+        TestMethod.GET_httpTest();
 
         /* LOGIN TEST API */
         TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
+        TestMethod.GET_httpTest();
 
         /* MEMBER TABLE TEST API */
 //        TestMethod.GET_Members();

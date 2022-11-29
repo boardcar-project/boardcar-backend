@@ -23,13 +23,13 @@ public class RequestController {
     private static final PostDAO postDAO = new PostDAO();
 
     public static Map<String, String> sessionContext = new HashMap<>();
-    public static Map<String, String> headers = new HashMap<String, String>() {
+    public static Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> httpTest = request -> HttpResponse.ok(headers, "httpTest Success");
+    public static Function<HttpRequest, HttpResponse> httpTest = request -> HttpResponse.ok(serverDefaultHeaders, "httpTest Success");
     public static Function<HttpRequest, HttpResponse> login = request -> {
 
         // HTTP request body에서 JSON parse
@@ -41,7 +41,7 @@ public class RequestController {
         } catch (JSONException e) {
             // JSON이 잘못 되었을 때
             e.printStackTrace();
-            return HttpResponse.badRequest(headers, "Invalid body (JSON format)");
+            return HttpResponse.badRequest(serverDefaultHeaders, "Invalid body (JSON format)");
         }
 
         // DB에서 회원 ID 찾기
@@ -50,12 +50,12 @@ public class RequestController {
 
             // PW가 틀린 경우
             if (!requestMember.getPassword().equals(password)) {
-                return HttpResponse.badRequest(headers, "login failed (mismatch PASSWORD)");
+                return HttpResponse.badRequest(serverDefaultHeaders, "login failed (mismatch PASSWORD)");
             }
         } catch (SQLException e) {
             // ID를 찾지 못했을 때
             e.printStackTrace();
-            return HttpResponse.badRequest(headers, "login failed (not found ID)");
+            return HttpResponse.badRequest(serverDefaultHeaders, "login failed (not found ID)");
         }
 
         // 로그인 성공! -> 세션 생성
@@ -63,9 +63,10 @@ public class RequestController {
         sessionContext.put(uuid.toString(), id);
 
         // 헤더에 추가
-        headers.put("Session-Key", uuid.toString());
+        HttpResponse httpResponse = HttpResponse.ok(serverDefaultHeaders, "login success");
+        httpResponse.putHeader("Session-Key", uuid.toString());
 
-        return HttpResponse.ok(headers, "login success");
+        return httpResponse;
     };
 
     public static Function<HttpRequest, HttpResponse> myInfo = request -> {
@@ -73,7 +74,7 @@ public class RequestController {
         // 세션 체크
         String targetId;
         if ((targetId = getIdFromSessionContext(request)) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 Member 레코드 가져와서 JSON 형식으로 body에 저장
@@ -81,10 +82,10 @@ public class RequestController {
             // SQL 실행
             MemberVO targetMember = memberDAO.SELECT_memberByMid(targetId);
 
-            return HttpResponse.ok(headers, targetMember.toJSON());
+            return HttpResponse.ok(serverDefaultHeaders, targetMember.toJSON());
 
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
     };
@@ -93,7 +94,7 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 member 정보 가져오기
@@ -107,10 +108,10 @@ public class RequestController {
                 jsonArray.put(memberVO.toJSON());
             }
 
-            return HttpResponse.ok(headers, jsonArray.toString());
+            return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
 
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
 
@@ -119,16 +120,16 @@ public class RequestController {
         // 세션 체크
         String targetId;
         if ((targetId = getIdFromSessionContext(request)) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // 비밀번호 변경
         try {
             int sqlResult = memberDAO.UPDATE_memberPassword(targetId, new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(headers, "Password is changed successfully (Changed record : " + sqlResult + ")");
+            return HttpResponse.ok(serverDefaultHeaders, "Password is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
 
@@ -136,17 +137,17 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // 게시글 업로드
         try {
             int sqlResult = postDAO.INSERT_post(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(headers, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
+            return HttpResponse.ok(serverDefaultHeaders, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
 
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
     };
@@ -155,7 +156,7 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 게시글 리스트 가져오기
@@ -169,10 +170,10 @@ public class RequestController {
                 jsonArray.put(postVO.toJSON());
             }
 
-            return HttpResponse.ok(headers, jsonArray.toString());
+            return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
 
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
 
@@ -180,17 +181,17 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 PID로 게시글 가져오기
         try {
             PostVO postVO = postDAO.SELECT_postByPid(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(headers, postVO.toJSON());
+            return HttpResponse.ok(serverDefaultHeaders, postVO.toJSON());
 
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
 
@@ -198,16 +199,16 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // 게시글 내용 변경
         try {
             int sqlResult = postDAO.UPDATE_post(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(headers, "Post body is changed successfully (Changed record : " + sqlResult + ")");
+            return HttpResponse.ok(serverDefaultHeaders, "Post body is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
     };
@@ -216,22 +217,22 @@ public class RequestController {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(headers, "please login before access DB");
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // 게시글 삭제
         try {
             int sqlResult = postDAO.DELETE_post(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(headers, "Post is deleted successfully (Changed record : " + sqlResult + ")");
+            return HttpResponse.ok(serverDefaultHeaders, "Post is deleted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
-            return HttpResponse.badRequest(headers, e.toString());
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
     };
 
 
-    public static Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(headers, "Wrong API access");
+    public static Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 
     public static String getIdFromSessionContext(HttpRequest request) {
         String sessionKey = request.getHeaders().getOrDefault("Session-Key", null);
