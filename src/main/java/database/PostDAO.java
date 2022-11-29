@@ -45,7 +45,7 @@ public class PostDAO {
         List<PostVO> postVOList = new LinkedList<>();
 
         // SQL query 생성
-        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM POST WHERE TYPE=?");
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM POST WHERE TYPE=? ORDER BY PID DESC");
         sqlQuery.setString(1, type);
 
         // SQL query 실행
