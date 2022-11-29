@@ -15,15 +15,15 @@ public class HttpRequest {
      * */
 
     /* start-line */
-    String method;
-    String path;
-    String version;
+    private final String method;
+    private final String path;
+    private final String version;
 
     /* headers */
-    Map<String, String> headers;
+    private final Map<String, String> headers;
 
     /* body */
-    String body;
+    private final String body;
 
     /* Constructor */
     public HttpRequest(String method, String path, String version, Map<String, String> headers, String body) {
@@ -49,9 +49,7 @@ public class HttpRequest {
         stringBuilder.append(method).append(" ").append(path).append(" ").append(version).append("\n");
 
         /* headers */
-        headers.forEach((header, value) -> {
-            stringBuilder.append(header).append(": ").append(value).append("\n");
-        });
+        headers.forEach((header, value) -> stringBuilder.append(header).append(": ").append(value).append("\n"));
         stringBuilder.append("\n");
 
         /* body */

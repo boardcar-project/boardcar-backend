@@ -23,12 +23,4 @@ public class CarVO {
 
         return jsonObject.toString();
     }
-
-    public int getCID() {
-        return CID;
-    }
-
-    public String getNAME() {
-        return NAME;
-    }
 }

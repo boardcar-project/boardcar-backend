@@ -31,10 +31,10 @@ public class HttpClientTestApp {
 
         /* POST TABLE API TEST */
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
-//        TestMethod.GET_openPostList("자유");
+        TestMethod.GET_openPostList("자유");
 //        TestMethod.DELETE_deletePost(25);
 
-//        TestMethod.GET_openPostByPid(11);
+        TestMethod.GET_openPostByPid(11);
 //        TestMethod.POST_updatePost(11, "바디 변경 테스트");
 
         /* CAR TABLE API TEST */
@@ -106,7 +106,7 @@ public class HttpClientTestApp {
         }
 
         // 바디 parse
-        String body = null;
+        String body = "";
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
         if (contentLength > 0) {
 
@@ -138,8 +138,8 @@ public class HttpClientTestApp {
 
 class TestMethod {
 
-    private static String version = "HTTP/1.1";
-    private static Map<String, String> headers = new HashMap<String, String>() {{
+    private static final String version = "HTTP/1.1";
+    private static final Map<String, String> headers = new HashMap<String, String>() {{
         put("Content-Type", "text/html;charset=utf-8");
     }};
 

@@ -20,8 +20,8 @@ public class RequestController {
     private static final PostDAO postDAO = new PostDAO();
     private static final CarDAO carDAO = new CarDAO();
 
-    public static Map<String, String> sessionContext = new HashMap<>();
-    public static Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
+    public static final Map<String, String> sessionContext = new HashMap<>();
+    public static final Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
             put("Content-Type", "application/json");
@@ -29,8 +29,8 @@ public class RequestController {
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> httpTest = request -> HttpResponse.ok(serverDefaultHeaders, "httpTest Success");
-    public static Function<HttpRequest, HttpResponse> login = request -> {
+    public static final Function<HttpRequest, HttpResponse> httpTest = request -> HttpResponse.ok(serverDefaultHeaders, "httpTest Success");
+    public static final Function<HttpRequest, HttpResponse> login = request -> {
 
         // HTTP request body에서 JSON parse
         String id, password;
@@ -69,7 +69,7 @@ public class RequestController {
         return httpResponse;
     };
 
-    public static Function<HttpRequest, HttpResponse> myInfo = request -> {
+    public static final Function<HttpRequest, HttpResponse> myInfo = request -> {
 
         // 세션 체크
         String targetId;
@@ -90,7 +90,7 @@ public class RequestController {
 
     };
 
-    public static Function<HttpRequest, HttpResponse> members = request -> {
+    public static final Function<HttpRequest, HttpResponse> members = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -115,7 +115,7 @@ public class RequestController {
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> changePassword = request -> {
+    public static final Function<HttpRequest, HttpResponse> changePassword = request -> {
 
         // 세션 체크
         String targetId;
@@ -133,7 +133,7 @@ public class RequestController {
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> uploadPost = request -> {
+    public static final Function<HttpRequest, HttpResponse> uploadPost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -152,7 +152,7 @@ public class RequestController {
 
     };
 
-    public static Function<HttpRequest, HttpResponse> openPostList = request -> {
+    public static final Function<HttpRequest, HttpResponse> openPostList = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -177,7 +177,7 @@ public class RequestController {
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> openPost = request -> {
+    public static final Function<HttpRequest, HttpResponse> openPost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -195,7 +195,7 @@ public class RequestController {
         }
     };
 
-    public static Function<HttpRequest, HttpResponse> updatePost = request -> {
+    public static final Function<HttpRequest, HttpResponse> updatePost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -213,7 +213,7 @@ public class RequestController {
 
     };
 
-    public static Function<HttpRequest, HttpResponse> deletePost = request -> {
+    public static final Function<HttpRequest, HttpResponse> deletePost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
@@ -231,7 +231,7 @@ public class RequestController {
 
     };
 
-    public static Function<HttpRequest, HttpResponse> getCarByCid = request -> {
+    public static final Function<HttpRequest, HttpResponse> getCarByCid = request -> {
 
         // 차량 레코드 가져오기
         try {
@@ -244,7 +244,7 @@ public class RequestController {
 
     };
 
-    public static Function<HttpRequest, HttpResponse> getCarList = request -> {
+    public static final Function<HttpRequest, HttpResponse> getCarList = request -> {
 
         // 차량 레코드 가져오기
         try {
@@ -263,7 +263,7 @@ public class RequestController {
     };
 
 
-    public static Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
+    public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 
     public static String getIdFromSessionContext(HttpRequest request) {
         String sessionKey = request.getHeaders().getOrDefault("Session-Key", null);

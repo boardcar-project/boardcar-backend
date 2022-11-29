@@ -16,15 +16,15 @@ public class HttpResponse {
      * */
 
     /* status-line */
-    String version;
-    String statusCode;
-    String statusText;
+    private final String version;
+    private final String statusCode;
+    private final String statusText;
 
     /* headers */
-    Map<String, String> headers;
+    private final Map<String, String> headers;
 
     /* body */
-    String body;
+    private final String body;
 
     /* Constructor */
     public HttpResponse(String version, String statusCode, String statusText, Map<String, String> headers, String body) {
@@ -65,9 +65,7 @@ public class HttpResponse {
         stringBuilder.append(version).append(" ").append(statusCode).append(" ").append(statusText).append("\n");
 
         /* headers */
-        headers.forEach((header, value) -> {
-            stringBuilder.append(header).append(": ").append(value).append("\n");
-        });
+        headers.forEach((header, value) -> stringBuilder.append(header).append(": ").append(value).append("\n"));
         stringBuilder.append("\n");
 
         /* body */
@@ -88,7 +86,4 @@ public class HttpResponse {
         return headers;
     }
 
-    public String getBody() {
-        return body;
-    }
 }
