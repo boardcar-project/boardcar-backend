@@ -2,10 +2,7 @@ import http.HttpRequest;
 import http.HttpResponse;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -20,19 +17,19 @@ public class HttpClientTestApp {
 
     public static void main(String[] args) throws IOException {
 
-        /* HTTP TEST API */
+        /* HTTP API TEST */
         TestMethod.GET_httpTest();
 
-        /* LOGIN TEST API */
+        /* LOGIN API TEST */
         TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
-        TestMethod.GET_httpTest();
+//        TestMethod.GET_httpTest();
 
-        /* MEMBER TABLE TEST API */
+        /* MEMBER TABLE API TEST */
 //        TestMethod.GET_Members();
 //        TestMethod.GET_myInfo();
 //        TestMethod.POST_changePassword(TEST_NEW_PASSWORD);
 
-        /* POST TABLE TEST API*/
+        /* POST TABLE API TEST */
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
 //        TestMethod.GET_openPostList("자유");
 //        TestMethod.DELETE_deletePost(25);
@@ -40,6 +37,9 @@ public class HttpClientTestApp {
 //        TestMethod.GET_openPostByPid(11);
 //        TestMethod.POST_updatePost(11, "바디 변경 테스트");
 
+        /* CAR TABLE API TEST */
+        TestMethod.GET_getCarList();
+        TestMethod.GET_getCarByCid(1);
 
     }
 
@@ -48,8 +48,8 @@ public class HttpClientTestApp {
         // 서버 정보 가져오기
         Properties properties = new Properties();
         properties.load(new FileInputStream(".properties"));
-//        String SERVER_IP = properties.getProperty("SERVER_IP");
-        String SERVER_IP = "localhost";
+        String SERVER_IP = properties.getProperty("SERVER_IP");
+//        String SERVER_IP = "localhost";
         final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // HTTP 통신
@@ -317,6 +317,39 @@ class TestMethod {
         // 결과 출력
         System.out.println("--------------------------------");
         System.out.println(deletePostResponse);
+    }
+
+    public static void GET_getCarList() throws IOException {
+
+        // 요청
+        HttpRequest getCarListRequest = new HttpRequest("GET", "/getCarList", version, headers, "");
+
+        // 응답
+        HttpResponse getCarListResponse= HttpClientTestApp.sendHttpRequest(getCarListRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(getCarListResponse);
+
+    }
+
+    public static void GET_getCarByCid(int CID) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("CID", CID);
+
+        // 요청
+        HttpRequest getCarByCidRequest = new HttpRequest("POST", "/getCarByCid", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse getCarByCidResponse= HttpClientTestApp.sendHttpRequest(getCarByCidRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(getCarByCidResponse);
+
+
     }
 }
 

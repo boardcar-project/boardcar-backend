@@ -41,6 +41,9 @@ public class HttpServer {
             put("/openPost", RequestController.openPost);
             put("/updatePost", RequestController.updatePost);
             put("/deletePost", RequestController.deletePost);
+            put("/getCarByCid", RequestController.getCarByCid);
+            put("/getCarList", RequestController.getCarList);
+
         }
     };
 

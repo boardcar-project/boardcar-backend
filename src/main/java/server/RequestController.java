@@ -1,9 +1,6 @@
 package server;
 
-import database.MemberDAO;
-import database.MemberVO;
-import database.PostDAO;
-import database.PostVO;
+import database.*;
 import http.HttpRequest;
 import http.HttpResponse;
 import org.json.JSONArray;
@@ -21,6 +18,7 @@ public class RequestController {
 
     private static final MemberDAO memberDAO = new MemberDAO();
     private static final PostDAO postDAO = new PostDAO();
+    private static final CarDAO carDAO = new CarDAO();
 
     public static Map<String, String> sessionContext = new HashMap<>();
     public static Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
@@ -227,6 +225,37 @@ public class RequestController {
             int sqlResult = postDAO.DELETE_post(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(serverDefaultHeaders, "Post is deleted successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> getCarByCid = request -> {
+
+        // 차량 레코드 가져오기
+        try {
+            CarVO carVO = carDAO.SELECT_car(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, carVO.toJSON());
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> getCarList = request -> {
+
+        // 차량 레코드 가져오기
+        try {
+            List<CarVO> carVOList = carDAO.SELECT_carList();
+
+            JSONArray jsonArray = new JSONArray();
+            for(CarVO carVO : carVOList){
+                jsonArray.put(carVO.toJSON());
+            }
+
+            return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
         } catch (SQLException e) {
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
