@@ -26,6 +26,8 @@ public class RequestController {
     public static Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
+            put("Content-Type", "application/json");
+
         }
     };
 
