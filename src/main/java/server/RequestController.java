@@ -3,10 +3,12 @@ package server;
 import database.*;
 import http.HttpRequest;
 import http.HttpResponse;
+import mail.MailServer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.mail.MessagingException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +24,12 @@ public class RequestController {
     private static final ReplyDAO replyDAO = new ReplyDAO();
     private static final CarDAO carDAO = new CarDAO();
 
+    private static final MailServer mailserver = new MailServer();
+
     public static final Map<String, String> sessionContext = new HashMap<>();
+
+    public static int serverAuthNumber;
+
     public static final Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
@@ -323,8 +330,6 @@ public class RequestController {
 
     };
 
-
-
     public static final Function<HttpRequest, HttpResponse> getCarByCid = request -> {
 
         // 차량 레코드 가져오기
@@ -369,6 +374,28 @@ public class RequestController {
 
     };
 
+    public static Function<HttpRequest, HttpResponse> mail = request -> {
+
+        try {
+            mailserver.sendAuthMail(new JSONObject(request.getBody()));
+
+            return  HttpResponse.ok(serverDefaultHeaders, "Mail send success" + mailserver.getAuthNumber());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> auth = request ->{
+
+        if(mailserver.isMatchAuthNumber(new JSONObject(request.getBody()))){
+            return HttpResponse.ok(serverDefaultHeaders, "Auth success");
+        }else {
+            return HttpResponse.badRequest(serverDefaultHeaders, "Auth fail");
+        }
+
+    };
 
     public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 

@@ -52,7 +52,8 @@ public class HttpServer {
             put("/getCarList", RequestController.getCarList);
             put("/register", RequestController.register);
 
-
+            put("/mail", RequestController.mail);
+            put("/auth", RequestController.auth);
         }
     };
 
