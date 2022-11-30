@@ -18,28 +18,29 @@ public class HttpClientTestApp {
     public static void main(String[] args) throws IOException {
 
         /* HTTP API TEST */
-        TestMethod.GET_httpTest();
+//        TestMethod.GET_httpTest();
 
         /* LOGIN API TEST */
-        TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
+//        TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
 //        TestMethod.GET_httpTest();
 
         /* MEMBER TABLE API TEST */
 //        TestMethod.GET_Members();
 //        TestMethod.GET_myInfo();
 //        TestMethod.POST_changePassword(TEST_NEW_PASSWORD);
+        TestMethod.PUT_register("regTestId", "regTestPw", "regiserTest", "reg@gmail.com", "아반떼");
 
         /* POST TABLE API TEST */
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
-        TestMethod.GET_openPostList("자유");
+//        TestMethod.GET_openPostList("자유");
 //        TestMethod.DELETE_deletePost(25);
 
-        TestMethod.GET_openPostByPid(11);
+//        TestMethod.GET_openPostByPid(11);
 //        TestMethod.POST_updatePost(11, "바디 변경 테스트");
 
         /* CAR TABLE API TEST */
-        TestMethod.GET_getCarList();
-        TestMethod.GET_getCarByCid(1);
+//        TestMethod.GET_getCarList();
+//        TestMethod.GET_getCarByCid(1);
 
     }
 
@@ -48,14 +49,15 @@ public class HttpClientTestApp {
         // 서버 정보 가져오기
         Properties properties = new Properties();
         properties.load(new FileInputStream(".properties"));
-        String SERVER_IP = properties.getProperty("SERVER_IP");
-//        String SERVER_IP = "localhost";
+//        String SERVER_IP = properties.getProperty("SERVER_IP");
+        String SERVER_IP = "localhost";
         final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // HTTP 통신
         try {
             // 클라이언트 소켓 열기
             Socket socket = new Socket(SERVER_IP, SERVER_PORT); // 서버 연결
+            System.out.println("서버 연결 성공! (IP : " + SERVER_IP + ")");
 
             // 서버에 Request 보내기
             socket.getOutputStream().write(httpRequest.toString().getBytes(StandardCharsets.UTF_8));
@@ -349,6 +351,29 @@ class TestMethod {
         System.out.println("--------------------------------");
         System.out.println(getCarByCidResponse);
 
+
+    }
+
+    public static void PUT_register(String MID, String PASSWORD, String NAME, String EMAIL, String CNAME) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("MID", MID);
+        jsonObject.put("PASSWORD", PASSWORD);
+        jsonObject.put("NAME", NAME);
+        jsonObject.put("EMAIL", EMAIL);
+        jsonObject.put("CNAME", CNAME);
+
+        // 요청
+        HttpRequest registerRequest = new HttpRequest("PUT", "/register", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse registerResponse = HttpClientTestApp.sendHttpRequest(registerRequest);
+
+        // 결과 출력
+
+        System.out.println("--------------------------------");
+        System.out.println(registerResponse);
 
     }
 }

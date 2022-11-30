@@ -1,5 +1,6 @@
 package database;
 
+import oracle.jdbc.proxy.annotation.Pre;
 import org.json.JSONObject;
 import server.HttpServer;
 
@@ -52,5 +53,28 @@ public class MemberDAO {
 
         // SQL query 실행
         return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
+    }
+
+    public int INSERT_register(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        String MID = jsonObject.getString("MID");
+        String PASSWORD = jsonObject.getString("PASSWORD");
+        String NAME = jsonObject.getString("NAME");
+        String EMAIL = jsonObject.getString("EMAIL");
+        String CNAME = jsonObject.getString("CNAME");
+
+        // SQL 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection()
+                .prepareStatement("INSERT INTO MEMBER(MID, PASSWORD, NAME, EMAIL, CID)" +
+                        " VALUES (?, ?, ?, ?, (SELECT CID FROM CAR WHERE NAME=?))");
+        sqlQuery.setString(1, MID);
+        sqlQuery.setString(2, PASSWORD);
+        sqlQuery.setString(3, NAME);
+        sqlQuery.setString(4, EMAIL);
+        sqlQuery.setString(5, CNAME);
+
+        // SQL query 실행
+        return sqlQuery.executeUpdate();
     }
 }

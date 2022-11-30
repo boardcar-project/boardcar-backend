@@ -262,6 +262,19 @@ public class RequestController {
 
     };
 
+    public static final Function<HttpRequest, HttpResponse> register = request -> {
+
+        // 회원 등록
+        try {
+            int sqlResult = memberDAO.INSERT_register(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Register is done successfully (Inserted record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
 
     public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 

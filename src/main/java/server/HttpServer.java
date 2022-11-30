@@ -43,6 +43,7 @@ public class HttpServer {
             put("/deletePost", RequestController.deletePost);
             put("/getCarByCid", RequestController.getCarByCid);
             put("/getCarList", RequestController.getCarList);
+            put("/register", RequestController.register);
 
         }
     };
