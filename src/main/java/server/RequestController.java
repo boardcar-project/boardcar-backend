@@ -18,6 +18,8 @@ public class RequestController {
 
     private static final MemberDAO memberDAO = new MemberDAO();
     private static final PostDAO postDAO = new PostDAO();
+
+    private static final ReplyDAO replyDAO = new ReplyDAO();
     private static final CarDAO carDAO = new CarDAO();
 
     public static final Map<String, String> sessionContext = new HashMap<>();
@@ -249,6 +251,81 @@ public class RequestController {
         }
 
     };
+
+    public static final Function<HttpRequest, HttpResponse> openReplyList = request -> {
+
+        // DB에서 댓글 리스트 가져오기
+        try {
+            // SQL 실행
+            List<ReplyVO> replyVOList = replyDAO.SELECE_replyList(new JSONObject(request.getBody()));
+
+            // PostVO를 JSONObject로 만들어 JSONArray에 저장
+            JSONArray jsonArray = new JSONArray();
+            for (ReplyVO replyVO : replyVOList) {
+                jsonArray.put(replyVO.toJSON());
+            }
+
+            return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
+
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+    };
+
+    public static final Function<HttpRequest, HttpResponse> uploadReply = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 댓글 내용 변경
+        try {
+            int sqlResult = replyDAO.INSERT_reply(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Reply body is uploaded successfully (Inserted record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+    };
+
+    public static final Function<HttpRequest, HttpResponse> updateReply = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 게시글 내용 변경
+        try {
+            int sqlResult = replyDAO.UPDATE_reply(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Reply body is changed successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static final Function<HttpRequest, HttpResponse> deleteReply = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 게시글 삭제
+        try {
+            int sqlResult = replyDAO.DELETE_reply(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Post is deleted successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+
 
     public static final Function<HttpRequest, HttpResponse> getCarByCid = request -> {
 
