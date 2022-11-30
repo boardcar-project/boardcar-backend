@@ -133,6 +133,25 @@ public class RequestController {
         }
     };
 
+    public static final Function<HttpRequest, HttpResponse> changeCar = request -> {
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 비밀번호 변경
+        try {
+            int sqlResult = memberDAO.UPDATE_memberCar(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "CID is changed successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+
     public static final Function<HttpRequest, HttpResponse> uploadPost = request -> {
 
         // 세션 체크

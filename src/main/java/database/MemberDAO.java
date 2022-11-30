@@ -55,6 +55,22 @@ public class MemberDAO {
         return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
     }
 
+    public int UPDATE_memberCar(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        String MID = jsonObject.getString("MID");
+        String NAME = jsonObject.getString("NAME");
+
+        // SQL 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection()
+            .prepareStatement("UPDATE MEMBER SET CID=(SELECT CID FROM CAR WHERE NAME = ?) WHERE MID=?");
+        sqlQuery.setString(1, NAME);
+        sqlQuery.setString(2, MID);
+
+        // SQL query 실행
+        return sqlQuery.executeUpdate(); // UPDATE 된 레코드 수 반환
+    }
+
     public int INSERT_register(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
