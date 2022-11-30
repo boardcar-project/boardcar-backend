@@ -28,7 +28,10 @@ public class MemberDAO {
         return memberVOList; // 멤버 리스트 반환
     }
 
-    public MemberVO SELECT_memberByMid(String MID) throws SQLException {
+    public MemberVO SELECT_memberByMid(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        String MID = jsonObject.getString("MID");
 
         // SQL query 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER WHERE MID = ?");
@@ -41,9 +44,10 @@ public class MemberDAO {
         return new MemberVO(resultSet); // 멤버 반환
     }
 
-    public int UPDATE_memberPassword(String MID, JSONObject jsonObject) throws SQLException {
+    public int UPDATE_memberPassword(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
+        String MID = jsonObject.getString("MID");
         String newPassword = jsonObject.getString("password");
 
         // SQL 생성

@@ -33,7 +33,7 @@ public class HttpServer {
         {
             put("/httpTest", RequestController.httpTest);
             put("/login", RequestController.login);
-            put("/myInfo", RequestController.myInfo);
+            put("/member", RequestController.member);
             put("/members", RequestController.members);
             put("/changePassword", RequestController.changePassword);
             put("/changeCar", RequestController.changeCar);

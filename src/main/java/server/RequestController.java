@@ -48,7 +48,7 @@ public class RequestController {
 
         // DB에서 회원 ID 찾기
         try {
-            MemberVO requestMember = memberDAO.SELECT_memberByMid(id);
+            MemberVO requestMember = memberDAO.SELECT_memberByMid(new JSONObject(request.getBody()));
 
             // PW가 틀린 경우
             if (!requestMember.getPassword().equals(password)) {
@@ -71,18 +71,17 @@ public class RequestController {
         return httpResponse;
     };
 
-    public static final Function<HttpRequest, HttpResponse> myInfo = request -> {
+    public static final Function<HttpRequest, HttpResponse> member = request -> {
 
         // 세션 체크
-        String targetId;
-        if ((targetId = getIdFromSessionContext(request)) == null) {
+        if (getIdFromSessionContext(request) == null) {
             return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 Member 레코드 가져와서 JSON 형식으로 body에 저장
         try {
             // SQL 실행
-            MemberVO targetMember = memberDAO.SELECT_memberByMid(targetId);
+            MemberVO targetMember = memberDAO.SELECT_memberByMid(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(serverDefaultHeaders, targetMember.toJSON());
 
@@ -120,14 +119,13 @@ public class RequestController {
     public static final Function<HttpRequest, HttpResponse> changePassword = request -> {
 
         // 세션 체크
-        String targetId;
-        if ((targetId = getIdFromSessionContext(request)) == null) {
+        if (getIdFromSessionContext(request) == null) {
             return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // 비밀번호 변경
         try {
-            int sqlResult = memberDAO.UPDATE_memberPassword(targetId, new JSONObject(request.getBody()));
+            int sqlResult = memberDAO.UPDATE_memberPassword(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(serverDefaultHeaders, "Password is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
