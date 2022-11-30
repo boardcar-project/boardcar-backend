@@ -36,6 +36,7 @@ public class HttpServer {
             put("/myInfo", RequestController.myInfo);
             put("/members", RequestController.members);
             put("/changePassword", RequestController.changePassword);
+            put("/changeCar", RequestController.changeCar);
             put("/uploadPost", RequestController.uploadPost);
             put("/openPostList", RequestController.openPostList);
             put("/openPost", RequestController.openPost);
@@ -44,6 +45,7 @@ public class HttpServer {
             put("/getCarByCid", RequestController.getCarByCid);
             put("/getCarList", RequestController.getCarList);
             put("/register", RequestController.register);
+
 
         }
     };
