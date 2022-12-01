@@ -90,7 +90,7 @@ public class RequestController {
 
         // DB에서 회원 ID 찾기
         try {
-            MemberVO requestMember = memberDAO.SELECT_memberByMid(new JSONObject(request.getBody()));
+            MemberVO requestMember = memberDAO.SELECT_memberByMid(MID);
 
             // PW가 틀린 경우
             if (!requestMember.getPassword().equals(PASSWORD)) {
@@ -115,15 +115,16 @@ public class RequestController {
 
     public static final Function<HttpRequest, HttpResponse> member = request -> {
 
-        // 세션 체크
-        if (getIdFromSessionContext(request) == null) {
+        // 세션 체크 후 세션 맵에서 ID 가져오기
+        String targetId;
+        if ((targetId = getIdFromSessionContext(request)) == null) {
             return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
         // DB에서 Member 레코드 가져와서 JSON 형식으로 body에 저장
         try {
             // SQL 실행
-            MemberVO targetMember = memberDAO.SELECT_memberByMid(new JSONObject(request.getBody()));
+            MemberVO targetMember = memberDAO.SELECT_memberByMid(targetId);
 
             return HttpResponse.ok(serverDefaultHeaders, targetMember.toJSON());
 

@@ -168,8 +168,8 @@ class TestMethod {
 
         // 로그인 정보 JSON 생성
         JSONObject loginJson = new JSONObject();
-        loginJson.put("id", HttpClientTestApp.TEST_ID);
-        loginJson.put("password", HttpClientTestApp.TEST_PASSWORD);
+        loginJson.put("MID", HttpClientTestApp.TEST_ID);
+        loginJson.put("PASSWORD", HttpClientTestApp.TEST_PASSWORD);
 
         // 요청
         HttpRequest loginRequest = new HttpRequest("POST", "/login", version, headers, loginJson.toString());
