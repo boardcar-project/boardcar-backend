@@ -28,14 +28,11 @@ public class MemberDAO {
         return memberVOList; // 멤버 리스트 반환
     }
 
-    public MemberVO SELECT_memberByMid(JSONObject jsonObject) throws SQLException {
-
-        // JSON parse
-        String MID = jsonObject.getString("MID");
+    public MemberVO SELECT_memberByMid(String targetID) throws SQLException {
 
         // SQL query 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER WHERE MID = ?");
-        sqlQuery.setString(1, MID);
+        sqlQuery.setString(1, targetID);
 
         // SQL query 실행
         ResultSet resultSet = sqlQuery.executeQuery();
