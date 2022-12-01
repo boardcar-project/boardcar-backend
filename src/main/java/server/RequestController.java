@@ -37,6 +37,43 @@ public class RequestController {
     };
 
     public static final Function<HttpRequest, HttpResponse> httpTest = request -> HttpResponse.ok(serverDefaultHeaders, "httpTest Success");
+
+    public static final Function<HttpRequest, HttpResponse> register = request -> {
+
+        // 회원 등록
+        try {
+            int sqlResult = memberDAO.INSERT_register(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Register is done successfully (Inserted record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> mail = request -> {
+
+        try {
+            mailserver.sendAuthMail(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Mail send success" + mailserver.getAuthNumber());
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static Function<HttpRequest, HttpResponse> auth = request -> {
+
+        if (mailserver.isMatchAuthNumber(new JSONObject(request.getBody()))) {
+            return HttpResponse.ok(serverDefaultHeaders, "Auth success");
+        } else {
+            return HttpResponse.badRequest(serverDefaultHeaders, "Auth fail");
+        }
+
+    };
+
     public static final Function<HttpRequest, HttpResponse> login = request -> {
 
         // HTTP request body에서 JSON parse
@@ -156,24 +193,22 @@ public class RequestController {
 
     };
 
-
-    public static final Function<HttpRequest, HttpResponse> uploadPost = request -> {
+    public static final Function<HttpRequest, HttpResponse> openPost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
             return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
-        // 게시글 업로드
+        // DB에서 PID로 게시글 가져오기
         try {
-            int sqlResult = postDAO.INSERT_post(new JSONObject(request.getBody()));
+            PostVO postVO = postDAO.SELECT_postByPid(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(serverDefaultHeaders, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
+            return HttpResponse.ok(serverDefaultHeaders, postVO.toJSON());
 
         } catch (SQLException e) {
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
-
     };
 
     public static final Function<HttpRequest, HttpResponse> openPostList = request -> {
@@ -201,22 +236,24 @@ public class RequestController {
         }
     };
 
-    public static final Function<HttpRequest, HttpResponse> openPost = request -> {
+
+    public static final Function<HttpRequest, HttpResponse> uploadPost = request -> {
 
         // 세션 체크
         if (getIdFromSessionContext(request) == null) {
             return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
         }
 
-        // DB에서 PID로 게시글 가져오기
+        // 게시글 업로드
         try {
-            PostVO postVO = postDAO.SELECT_postByPid(new JSONObject(request.getBody()));
+            int sqlResult = postDAO.INSERT_post(new JSONObject(request.getBody()));
 
-            return HttpResponse.ok(serverDefaultHeaders, postVO.toJSON());
+            return HttpResponse.ok(serverDefaultHeaders, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
 
         } catch (SQLException e) {
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
+
     };
 
     public static final Function<HttpRequest, HttpResponse> updatePost = request -> {
@@ -348,7 +385,7 @@ public class RequestController {
             List<CarVO> carVOList = carDAO.SELECT_carList();
 
             JSONArray jsonArray = new JSONArray();
-            for(CarVO carVO : carVOList){
+            for (CarVO carVO : carVOList) {
                 jsonArray.put(carVO.toJSON());
             }
 
@@ -359,41 +396,6 @@ public class RequestController {
 
     };
 
-    public static final Function<HttpRequest, HttpResponse> register = request -> {
-
-        // 회원 등록
-        try {
-            int sqlResult = memberDAO.INSERT_register(new JSONObject(request.getBody()));
-
-            return HttpResponse.ok(serverDefaultHeaders, "Register is done successfully (Inserted record : " + sqlResult + ")");
-        } catch (SQLException e) {
-            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
-        }
-
-    };
-
-    public static Function<HttpRequest, HttpResponse> mail = request -> {
-
-        try {
-            mailserver.sendAuthMail(new JSONObject(request.getBody()));
-
-            return  HttpResponse.ok(serverDefaultHeaders, "Mail send success" + mailserver.getAuthNumber());
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
-        }
-
-    };
-
-    public static Function<HttpRequest, HttpResponse> auth = request ->{
-
-        if(mailserver.isMatchAuthNumber(new JSONObject(request.getBody()))){
-            return HttpResponse.ok(serverDefaultHeaders, "Auth success");
-        }else {
-            return HttpResponse.badRequest(serverDefaultHeaders, "Auth fail");
-        }
-
-    };
 
     public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 
