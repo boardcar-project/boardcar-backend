@@ -28,8 +28,6 @@ public class RequestController {
 
     public static final Map<String, String> sessionContext = new HashMap<>();
 
-    public static int serverAuthNumber;
-
     public static final Map<String, String> serverDefaultHeaders = new HashMap<String, String>() {
         {
             put("Server", "boardcar-server");
@@ -42,11 +40,11 @@ public class RequestController {
     public static final Function<HttpRequest, HttpResponse> login = request -> {
 
         // HTTP request body에서 JSON parse
-        String id, password;
+        String MID, PASSWORD;
         try {
             JSONObject jsonObject = new JSONObject(request.getBody());
-            id = jsonObject.getString("id");
-            password = jsonObject.getString("password");
+            MID = jsonObject.getString("MID");
+            PASSWORD = jsonObject.getString("PASSWORD");
         } catch (JSONException e) {
             // JSON이 잘못 되었을 때
             e.printStackTrace();
@@ -58,7 +56,7 @@ public class RequestController {
             MemberVO requestMember = memberDAO.SELECT_memberByMid(new JSONObject(request.getBody()));
 
             // PW가 틀린 경우
-            if (!requestMember.getPassword().equals(password)) {
+            if (!requestMember.getPassword().equals(PASSWORD)) {
                 return HttpResponse.badRequest(serverDefaultHeaders, "login failed (mismatch PASSWORD)");
             }
         } catch (SQLException e) {
@@ -69,7 +67,7 @@ public class RequestController {
 
         // 로그인 성공! -> 세션 생성
         UUID uuid = UUID.randomUUID();
-        sessionContext.put(uuid.toString(), id);
+        sessionContext.put(uuid.toString(), MID);
 
         // 헤더에 추가
         HttpResponse httpResponse = HttpResponse.ok(serverDefaultHeaders, "login success");
