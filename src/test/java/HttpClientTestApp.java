@@ -21,14 +21,14 @@ public class HttpClientTestApp {
 //        TestMethod.GET_httpTest();
 
         /* LOGIN API TEST */
-//        TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
+        TestMethod.POST_postLogin(); // 아래의 기능들은 반드시 로그인이 필요함
 //        TestMethod.GET_httpTest();
 
         /* MEMBER TABLE API TEST */
 //        TestMethod.GET_Members();
 //        TestMethod.GET_myInfo();
 //        TestMethod.POST_changePassword(TEST_NEW_PASSWORD);
-        TestMethod.PUT_register("regTestId", "regTestPw", "regiserTest", "reg@gmail.com", "아반떼");
+//        TestMethod.PUT_register("regTestId", "regTestPw", "regiserTest", "reg@gmail.com", "아반떼");
 
         /* POST TABLE API TEST */
 //        TestMethod.PUT_uploadPost("testid", "2022-11-11", "테스트 제목", "테스트 바디", "자유");
@@ -42,6 +42,9 @@ public class HttpClientTestApp {
 //        TestMethod.GET_getCarList();
 //        TestMethod.GET_getCarByCid(1);
 
+        /* Mail test*/
+//        TestMethod.POST_mailTest("");
+
     }
 
     public static HttpResponse sendHttpRequest(HttpRequest httpRequest) throws IOException {
@@ -49,8 +52,8 @@ public class HttpClientTestApp {
         // 서버 정보 가져오기
         Properties properties = new Properties();
         properties.load(new FileInputStream(".properties"));
-//        String SERVER_IP = properties.getProperty("SERVER_IP");
-        String SERVER_IP = "localhost";
+        String SERVER_IP = properties.getProperty("SERVER_IP");
+//        String SERVER_IP = "localhost";
         final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
         // HTTP 통신
@@ -374,6 +377,44 @@ class TestMethod {
 
         System.out.println("--------------------------------");
         System.out.println(registerResponse);
+
+    }
+
+    public static void POST_mailTest(String email) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("EMAIL", email);
+
+        // 요청
+        HttpRequest getCarByCidRequest = new HttpRequest("GET", "/mail", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse getCarByCidResponse= HttpClientTestApp.sendHttpRequest(getCarByCidRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(getCarByCidResponse);
+
+
+    }
+
+    public static void POST_auth(int authnum) throws IOException {
+
+        // JSON 생성
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("EMAIL", authnum);
+
+        // 요청
+        HttpRequest getCarByCidRequest = new HttpRequest("GET", "/mail", version, headers, jsonObject.toString());
+
+        // 응답
+        HttpResponse getCarByCidResponse= HttpClientTestApp.sendHttpRequest(getCarByCidRequest);
+
+        // 결과 출력
+        System.out.println("--------------------------------");
+        System.out.println(getCarByCidResponse);
+
 
     }
 }
