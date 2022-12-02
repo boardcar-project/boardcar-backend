@@ -10,15 +10,15 @@ public class MemberVO {
     private final String MID;
     private final String PASSWORD;
     private final String NAME;
-    private final int CID;
     private final String EMAIL;
+    private final int CID;
 
     public MemberVO(ResultSet resultSet) throws SQLException {
         this.MID = resultSet.getString("MID");
         this.PASSWORD = resultSet.getString("PASSWORD");
         this.NAME = resultSet.getString("NAME");
-        this.CID = resultSet.getInt("CID");
         this.EMAIL = resultSet.getString("EMAIL");
+        this.CID = resultSet.getInt("CID");
     }
 
     public String toJSON() {
@@ -27,8 +27,8 @@ public class MemberVO {
         jsonObject.put("MID", MID);
         jsonObject.put("PASSWORD", PASSWORD);
         jsonObject.put("NAME", NAME);
-        jsonObject.put("CID", CID);
         jsonObject.put("EMAIL", EMAIL);
+        jsonObject.put("CID", CID);
 
         return jsonObject.toString();
     }

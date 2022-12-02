@@ -159,6 +159,22 @@ public class RequestController {
         }
     };
 
+
+
+    public static final Function<HttpRequest, HttpResponse> memberByEmail = request->{
+
+        // 이메일로 멤버 찾기
+        try {
+            MemberVO memberVO = memberDAO.SELECT_memberByEmail(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, memberVO.toJSON());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
     public static final Function<HttpRequest, HttpResponse> changePassword = request -> {
 
         // 세션 체크
@@ -269,6 +285,42 @@ public class RequestController {
             int sqlResult = postDAO.UPDATE_post(new JSONObject(request.getBody()));
 
             return HttpResponse.ok(serverDefaultHeaders, "Post body is changed successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static final Function<HttpRequest, HttpResponse> upvotePost = request ->{
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 추천수 + 1
+        try {
+            int sqlResult = postDAO.UPDATE_postUpvote(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
+
+    public static final Function<HttpRequest, HttpResponse> downvotePost = request ->{
+
+        // 세션 체크
+        if (getIdFromSessionContext(request) == null) {
+            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
+        }
+
+        // 추천수 + 1
+        try {
+            int sqlResult = postDAO.UPDATE_postDownvote(new JSONObject(request.getBody()));
+
+            return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
@@ -396,55 +448,8 @@ public class RequestController {
         }
     };
 
-    public static final Function<HttpRequest, HttpResponse> memberByEmail = request->{
-
-        // 이메일로 멤버 찾기
-        try {
-            MemberVO memberVO = memberDAO.SELECT_memberByEmail(new JSONObject(request.toString()));
-
-            return HttpResponse.ok(serverDefaultHeaders, memberVO.toJSON());
-        } catch (SQLException e) {
-            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
-        }
-
-    };
-
     public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
-    public static final Function<HttpRequest, HttpResponse> upvotePost = request ->{
 
-        // 세션 체크
-        if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
-        }
-
-        // 추천수 + 1
-        try {
-            int sqlResult = postDAO.UPDATE_postUpvote(new JSONObject(request.getBody()));
-
-            return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
-        } catch (SQLException e) {
-            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
-        }
-
-    };
-
-    public static final Function<HttpRequest, HttpResponse> downvotePost = request ->{
-
-        // 세션 체크
-        if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
-        }
-
-        // 추천수 + 1
-        try {
-            int sqlResult = postDAO.UPDATE_postDownvote(new JSONObject(request.getBody()));
-
-            return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
-        } catch (SQLException e) {
-            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
-        }
-
-    };
 
     public static String getIdFromSessionContext(HttpRequest request) {
         String sessionKey = request.getHeaders().getOrDefault("Session-Key", null);
