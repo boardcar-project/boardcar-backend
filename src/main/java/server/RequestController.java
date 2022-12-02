@@ -46,6 +46,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Register is done successfully (Inserted record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -129,6 +130,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, targetMember.toJSON());
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -155,6 +157,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -188,6 +191,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Password is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -205,6 +209,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "CID is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -224,6 +229,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, postVO.toJSON());
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -249,6 +255,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -268,6 +275,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, "Post is uploaded successfully (Inserted record : " + sqlResult + ")");
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -286,6 +294,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Post body is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -304,6 +313,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -322,6 +332,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Post is upvoted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -340,6 +351,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Post is deleted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -361,6 +373,7 @@ public class RequestController {
             return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
 
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -378,6 +391,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Reply body is uploaded successfully (Inserted record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };
@@ -395,6 +409,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Reply body is changed successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -413,6 +428,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, "Post is deleted successfully (Changed record : " + sqlResult + ")");
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -426,6 +442,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, carVO.toJSON());
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
 
@@ -444,6 +461,7 @@ public class RequestController {
 
             return HttpResponse.ok(serverDefaultHeaders, jsonArray.toString());
         } catch (SQLException e) {
+            e.printStackTrace();
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
     };

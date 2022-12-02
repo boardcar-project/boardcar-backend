@@ -78,8 +78,8 @@ public class HttpResponse {
         return statusCode;
     }
 
-    public String getStatusText() {
-        return statusText;
+    public String getBody() {
+        return body;
     }
 
     public Map<String, String> getHeaders() {

@@ -49,7 +49,7 @@ public class HttpServer {
             put("/uploadReply", RequestController.uploadReply);
             put("/updateReply", RequestController.updateReply);
             put("/deleteReply", RequestController.deleteReply);
-            put("/openReply", RequestController.openReplyList);
+            put("/openReplyList", RequestController.openReplyList);
 
             put("/getCarByCid", RequestController.getCarByCid);
             put("/getCarList", RequestController.getCarList);
@@ -99,11 +99,11 @@ public class HttpServer {
         try {
             // Sender의 InputStream
             HttpRequest request = requestBuilder(connection.getInputStream());
-            logger.info("[Request] " + connection.toString());
+            logger.info("[Request] " + request.getPath() + "|" + request.getBody());
 
             // Sender의 Request 처리
             HttpResponse response = requestDispatcher(request);
-            logger.info("[Response] " + connection.toString());
+            logger.info("[Response] " + response.getBody());
 
             // Sender에게 Request 응답
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
@@ -111,6 +111,7 @@ public class HttpServer {
             out.flush();
 
         } catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } finally {
             try {
