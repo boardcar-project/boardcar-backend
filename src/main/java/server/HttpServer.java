@@ -54,6 +54,8 @@ public class HttpServer {
 
             put("/mail", RequestController.mail);
             put("/auth", RequestController.auth);
+
+            put("/memberByEmail", RequestController.memberByEmail);
         }
     };
 

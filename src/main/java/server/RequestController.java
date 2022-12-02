@@ -394,9 +394,20 @@ public class RequestController {
         } catch (SQLException e) {
             return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
         }
-
     };
 
+    public static Function<HttpRequest, HttpResponse> memberByEmail = request->{
+
+        // 이메일로 멤버 찾기
+        try {
+            MemberVO memberVO = memberDAO.SELECT_memberByEmail(new JSONObject(request.toString()));
+
+            return HttpResponse.ok(serverDefaultHeaders, memberVO.toJSON());
+        } catch (SQLException e) {
+            return HttpResponse.badRequest(serverDefaultHeaders, e.toString());
+        }
+
+    };
 
     public static final Function<HttpRequest, HttpResponse> other = request -> HttpResponse.notFound(serverDefaultHeaders, "Wrong API access");
 

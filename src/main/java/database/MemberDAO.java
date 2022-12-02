@@ -1,6 +1,5 @@
 package database;
 
-import oracle.jdbc.proxy.annotation.Pre;
 import org.json.JSONObject;
 import server.HttpServer;
 
@@ -41,6 +40,22 @@ public class MemberDAO {
         return new MemberVO(resultSet); // 멤버 반환
     }
 
+    public MemberVO SELECT_memberByEmail(JSONObject jsonObject) throws SQLException {
+
+        // JSON parse
+        String EMAIL = jsonObject.getString("EMAIL");
+
+        // SQL query 생성
+        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("SELECT * FROM MEMBER WHERE EMAIL = ?");
+        sqlQuery.setString(1, EMAIL);
+
+        // SQL query 실행
+        ResultSet resultSet = sqlQuery.executeQuery();
+        resultSet.next();
+
+        return new MemberVO((resultSet));
+    }
+
     public int UPDATE_memberPassword(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
@@ -64,7 +79,7 @@ public class MemberDAO {
 
         // SQL 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection()
-            .prepareStatement("UPDATE MEMBER SET CID=(SELECT CID FROM CAR WHERE NAME = ?) WHERE MID=?");
+                .prepareStatement("UPDATE MEMBER SET CID=(SELECT CID FROM CAR WHERE NAME = ?) WHERE MID=?");
         sqlQuery.setString(1, NAME);
         sqlQuery.setString(2, MID);
 
