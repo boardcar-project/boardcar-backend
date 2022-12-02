@@ -11,28 +11,6 @@ import java.util.List;
 
 public class ReplyDAO {
 
-    public int INSERT_post(JSONObject jsonObject) throws SQLException {
-
-        // JSON parse
-        String MID = jsonObject.getString("MID");
-        String PDATE = jsonObject.getString("PDATE");
-        String TITLE = jsonObject.getString("TITLE");
-        String BODY = jsonObject.getString("BODY");
-        String TYPE = jsonObject.getString("TYPE");
-
-        // SQL query 생성
-        PreparedStatement sqlQuery = HttpServer.getDatabaseConnection().prepareStatement("INSERT INTO POST (PID, MID, PDATE, TITLE, BODY, TYPE) VALUES (PCOUNTER.nextval, ?,to_date(?, 'YYYY-MM-DD'),?,?,?)");
-        sqlQuery.setString(1, MID);
-        sqlQuery.setString(2, PDATE);
-        sqlQuery.setString(3, TITLE);
-        sqlQuery.setString(4, BODY);
-        sqlQuery.setString(5, TYPE);
-
-        // SQL query 실행
-        return sqlQuery.executeUpdate(); // INSERT 된 레코드 수 반환
-    }
-
-
     public int INSERT_reply(JSONObject jsonObject) throws SQLException {
 
         // JSON parse
