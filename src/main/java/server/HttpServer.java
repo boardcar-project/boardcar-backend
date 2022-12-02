@@ -63,12 +63,12 @@ public class HttpServer {
         properties.load(Files.newInputStream(Paths.get(".properties")));
         final int SERVER_PORT = Integer.parseInt(properties.getProperty("SERVER_PORT"));
 
-        // DB 서버 연결
-        databaseConnection = DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_ID"), properties.getProperty("DB_PW"));
-
         // 서버 시작
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             logger.info("Server start (PORT : " + SERVER_PORT + ")");
+
+            // DB 서버 연결
+            databaseConnection = DriverManager.getConnection(properties.getProperty("DB_URL"), properties.getProperty("DB_ID"), properties.getProperty("DB_PW"));
 
             // 클라이언트 연결 요청 대기
             Socket clientSocket;
@@ -80,10 +80,13 @@ public class HttpServer {
                 executorService.submit(() -> requestHandler(connection)); // 클라이언트와 통신 쓰레드
             }
 
+            // 서버 종료
+            databaseConnection.close();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
     }
 
 
