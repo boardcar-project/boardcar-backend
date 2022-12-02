@@ -37,11 +37,14 @@ public class HttpServer {
             put("/members", RequestController.members);
             put("/changePassword", RequestController.changePassword);
             put("/changeCar", RequestController.changeCar);
+
             put("/uploadPost", RequestController.uploadPost);
             put("/openPostList", RequestController.openPostList);
             put("/openPost", RequestController.openPost);
             put("/updatePost", RequestController.updatePost);
             put("/deletePost", RequestController.deletePost);
+            put("/upvotePost", RequestController.upvotePost);
+            put("/downvotePost", RequestController.downvotePost);
 
             put("/uploadReply", RequestController.uploadReply);
             put("/updateReply", RequestController.updateReply);
