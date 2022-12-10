@@ -180,11 +180,6 @@ public class RequestController {
 
     public static final Function<HttpRequest, HttpResponse> changePassword = request -> {
 
-        // 세션 체크
-        if (getIdFromSessionContext(request) == null) {
-            return HttpResponse.badRequest(serverDefaultHeaders, "please login before access DB");
-        }
-
         // 비밀번호 변경
         try {
             int sqlResult = memberDAO.UPDATE_memberPassword(new JSONObject(request.getBody()));

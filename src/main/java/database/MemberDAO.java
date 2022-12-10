@@ -75,12 +75,12 @@ public class MemberDAO {
 
         // JSON parse
         String MID = jsonObject.getString("MID");
-        String NAME = jsonObject.getString("NAME");
+        int CID = jsonObject.getInt("NAME");
 
         // SQL 생성
         PreparedStatement sqlQuery = HttpServer.getDatabaseConnection()
-                .prepareStatement("UPDATE MEMBER SET CID=(SELECT CID FROM CAR WHERE NAME = ?) WHERE MID=?");
-        sqlQuery.setString(1, NAME);
+                .prepareStatement("UPDATE MEMBER SET CID=(SELECT CID FROM CAR WHERE CID = ?) WHERE MID=?");
+        sqlQuery.setInt(1, CID);
         sqlQuery.setString(2, MID);
 
         // SQL query 실행
